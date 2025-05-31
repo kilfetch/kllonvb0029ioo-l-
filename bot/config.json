@@ -1,0 +1,9 @@
+{
+    "api_base_url": "https://server.refind.website/",
+    "check_interval": 10800,
+    "telegram_topic_id": 475,
+    "telegram_chat_id": -1002504718480,
+    "check_endpoints": [
+        ""
+    ]
+}
