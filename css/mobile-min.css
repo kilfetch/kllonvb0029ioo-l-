@@ -1,0 +1,100 @@
+
+@media (max-width: 768px) {
+    
+    body {
+        font-size: 15px;
+    }
+
+    .api-container {
+        width: 92%;
+        padding: 1rem 0;
+    }
+
+    .api-title {
+        font-size: 1.8rem;
+    }
+    
+    .api-subtitle {
+        font-size: 0.95rem;
+    }
+    
+    .api-section-title {
+        font-size: 1.4rem;
+    }
+
+    .api-endpoint {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+    }
+    
+    .endpoint-url {
+        font-size: 0.9rem;
+        word-break: break-all;
+    }
+
+    .param-table {
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
+    .param-table th, 
+    .param-table td {
+        padding: 8px 10px;
+        min-width: 80px;
+    }
+
+    .api-types {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .code-example {
+        font-size: 0.8rem;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+    }
+    
+    .code-example pre {
+        padding: 1rem;
+    }
+
+    .desktop-menu {
+        display: none;
+    }
+    
+    #Menu-bar {
+        display: block;
+    }
+    
+    .menu-data {
+        width: 85%;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+    }
+
+    .low-perf-device .api-endpoint,
+    .low-perf-device .api-type-card {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+    
+    .low-perf-device .api-title {
+        background: #fff;
+        -webkit-text-fill-color: #fff;
+        animation: none;
+    }
+
+    .navbar {
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+    }
+
+    .secure-note {
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+    }
+} 
