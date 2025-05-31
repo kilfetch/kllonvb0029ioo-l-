@@ -1,0 +1,14 @@
+{
+    "results": [
+        {
+            "_id": "Результат №1234567890",
+            "database": "Демо база данных",
+            "explain": "Демонстрационные данные для тестирования API",
+            "phone": "+79999999999",
+            "name": "Тестовый Пользователь",
+            "email": "test@example.com"
+        }
+    ],
+    "execution_time": 0.05,
+    "remaining_requests": "Unlimited"
+} 

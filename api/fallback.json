@@ -1,0 +1,21 @@
+{
+    "status": "success",
+    "message": "API в настоящее время недоступно. Пожалуйста, повторите запрос позже.",
+    "results": [
+        {
+            "_id": "FallbackResult001",
+            "database": "Резервная база данных",
+            "explain": "Эти данные используются, когда основной API недоступен",
+            "phone": "+79999999999",
+            "name": "Резервный Пользователь",
+            "email": "fallback@example.com"
+        }
+    ],
+    "count": 0,
+    "totalFound": 0,
+    "searchTime": 0,
+    "execution_time": 0.01,
+    "remaining_requests": "Unlimited",
+    "is_fallback": true,
+    "timestamp": "2024-01-01T00:00:00.000Z"
+} 
