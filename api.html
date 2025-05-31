@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<script src="/js/mobile-redirect.js"></script>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+<meta http-equiv="Cache-Control" content="max-age=86400" />
+<meta http-equiv="Expires" content="86400" />
+<title>ReFind API Documentation</title>
+<meta name="description" content="Документация по использованию API сервиса ReFind для поиска по базам данных утечек"/>
+<meta name="theme-color" content="#121212"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="format-detection" content="telephone=no"/>
+<meta name="robots" content="index, follow"/>
+
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data:">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta name="referrer" content="no-referrer">
+
+<base id="dynamicBase">
+<script>
+    // Устанавливаем динамический базовый URL
+    document.getElementById('dynamicBase').href = window.location.protocol + '//' + window.location.host + '/';
+</script>
+
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"></noscript>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/news.css">
+
+<style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            background-color: #0A0A0A;
+            color: #FFF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+            text-rendering: optimizeSpeed;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background-color: rgba(12, 12, 12, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+        
+        .navbar.scrolled {
+            padding: 12px 24px;
+            background-color: rgba(10, 10, 10, 0.9);
+        }
+        
+        .ref {
+            width: auto;
+            height: 48px;
+            object-fit: contain;
+            max-width: 100%;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .navbar.scrolled .ref {
+            height: 40px;
+        }
+        
+        .desktop-menu {
+            display: flex;
+            gap: 16px;
+            margin-left: auto;
+        }
+        
+        .nav-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: transparent;
+            color: #FFF;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .nav-button.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        #Menu-bar {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        #Menu-bar:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .hero-section {
+            flex: 1;
+        background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            padding-top: 80px; 
+            position: relative;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+        
+        .api-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+        
+        .api-intro {
+            margin-bottom: 3.5rem;
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .api-title {
+            font-size: calc(2rem + 1vw);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #FFF;
+            letter-spacing: -0.03em;
+            text-align: center;
+        }
+        
+        .api-subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .api-section {
+            margin-bottom: 4rem;
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            animation-fill-mode: both;
+            animation-delay: 0.1s;
+            text-align: left;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+        
+        .api-section-title {
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            text-align: center;
+        }
+        
+        .api-section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .api-endpoint {
+        background-color: rgba(22, 22, 22, 0.7);
+            border-radius: 12px;
+            padding: 1.8rem;
+            margin-bottom: 2.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            animation-fill-mode: both;
+            animation-delay: calc(0.05s * var(--i));
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: left;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 900px;
+        }
+        
+        .api-endpoint:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .endpoint-method {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-right: 10px;
+            font-family: 'Roboto Mono', monospace;
+            text-align: left;
+        }
+        
+        .method-get {
+        background-color: rgba(160, 160, 160, 0.15);
+        color: #e0e0e0;
+        }
+        
+        .method-post {
+        background-color: rgba(160, 160, 160, 0.15);
+        color: #e0e0e0;
+        }
+        
+        .method-put {
+        background-color: rgba(160, 160, 160, 0.15);
+        color: #e0e0e0;
+        }
+        
+        .method-delete {
+        background-color: rgba(160, 160, 160, 0.15);
+        color: #e0e0e0;
+        }
+        
+        .endpoint-url {
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 500;
+            font-size: 1.1rem;
+            word-break: break-all;
+            text-align: left;
+        }
+        
+        .endpoint-description {
+            margin: 1rem 0;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            text-align: left;
+        }
+        
+        .endpoint-params {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        
+        .param-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .response-example .param-title {
+            text-align: center;
+        }
+
+        .param-table {
+            width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+            overflow-x: auto;
+            display: block;
+            text-align: left;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 900px;
+    }
+    
+    .param-table thead {
+        background-color: rgba(30, 30, 30, 0.8);
+        }
+        
+        .param-table th, .param-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .param-table th {
+        color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .param-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .param-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    
+    .param-table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+        }
+        
+        .param-required {
+            display: inline-block;
+        padding: 3px 8px;
+            border-radius: 4px;
+        font-size: 0.75rem;
+        background-color: rgba(160, 160, 160, 0.15);
+        color: #e0e0e0;
+        font-weight: 600;
+            text-align: left;
+        }
+        
+        .param-optional {
+            display: inline-block;
+        padding: 3px 8px;
+            border-radius: 4px;
+        font-size: 0.75rem;
+        background-color: rgba(160, 160, 160, 0.15);
+        color: #a0a0a0;
+        font-weight: 600;
+            text-align: left;
+        }
+
+        .code-example {
+            background-color: #1A1A1A;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px auto;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+            max-width: 900px;
+    }
+    
+    .code-example-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 16px;
+        background-color: #252525;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .code-example-title {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .code-example-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .code-example-action {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+    
+    .code-action-red {
+        background-color: #5f5f5f;
+    }
+    
+    .code-action-yellow {
+        background-color: #7a7a7a;
+    }
+    
+    .code-action-green {
+        background-color: #939393;
+        }
+        
+        .code-example pre {
+            padding: 16px;
+            margin: 0;
+            overflow-x: auto;
+            font-family: 'Roboto Mono', monospace;
+            line-height: 1.5;
+            tab-size: 4;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .code-line {
+            display: block;
+            padding: 2px 0;
+        }
+
+        .code-key {
+        color: #e0e0e0;
+            font-weight: 500;
+        }
+        
+        .code-string {
+        color: #c0c0c0;
+        }
+        
+        .code-number {
+        color: #a0a0a0;
+        }
+        
+        .code-boolean {
+        color: #d0d0d0;
+        }
+        
+        .code-null {
+        color: #b0b0b0;
+        }
+        
+        .code-comment {
+        color: #707070;
+            font-style: italic;
+        }
+        
+        .code-method {
+        color: #e0e0e0;
+            font-weight: bold;
+        }
+        
+        .response-example {
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="navbar" id="navbar">
+<div class="refind">
+<a href="/index.html">
+<img alt="ReFind" class="ref" src="/assets/img/wpeA3eVCpHOxX3g6xC.png" style="object-fit: contain; max-width: 100%; height: 60px;" />
+</a>
+</div>
+<div class="desktop-menu">
+<a href="/index.html" class="nav-button">Главная</a>
+<a href="/news.html" class="nav-button">Новости</a>
+<a href="/api.html" class="nav-button active">API</a>
+<a href="/search.html" class="nav-button">Поиск</a>
+</div>
+<div id="Menu-bar">
+<i class="fas fa-bars size-icon"></i>
+</div>
+</div>
+<div class="menu-data">
+<a href="/index.html">Главная</a>
+<a href="/news.html">Новости</a>
+<a href="/api.html">API</a>
+<a href="/search.html">Поиск</a>
+</div>
+
+<div class="hero-section">
+<div class="api-container">
+<div class="api-intro">
+<h1 class="api-title">Документация ReFind API</h1>
+<p class="api-subtitle">Используйте наш API для интеграции сервиса ReFind в свои приложения. Сервис предоставляет возможность поиска данных по утечкам.</p>
+
+<div style="max-width: 700px; margin: 20px auto; padding: 26px; background-color: #121212; border-radius: 16px; border: 1px solid #333333; text-align: left; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); position: relative; overflow: hidden; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+    
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: #333333;"></div>
+    
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <div style="width: 60px; height: 60px; background-color: #222222; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 20px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);">
+            <i class="fas fa-shield-alt" style="font-size: 2rem; color: #E0E0E0;"></i>
+        </div>
+        <div>
+            <h3 style="margin: 0; font-size: 1.5rem; font-weight: 600; letter-spacing: -0.01em; color: #FFFFFF;">Защищенный доступ к API</h3>
+            <p style="margin: 6px 0 0 0; font-size: 0.95rem; color: #AAAAAA;">URL API и ключи доступны только через Telegram</p>
+        </div>
+    </div>
+    
+    <div style="background-color: #1A1A1A; padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #333333; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+            <div style="width: 40px; height: 40px; background-color: #2A2A2A; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 16px; flex-shrink: 0;">
+                <i class="fas fa-robot" style="font-size: 1.1rem; color: #E0E0E0;"></i>
+            </div>
+            <div>
+                <div style="color: #AAAAAA; font-size: 0.85rem; margin-bottom: 4px;">Бот</div>
+                <a href="https://t.me/refindbot" style="color: #FFFFFF; font-size: 1rem; font-weight: 500; text-decoration: none; display: flex; align-items: center;">@refindbot</a>
+            </div>
+        </div>
+        
+        <div style="display: flex; align-items: center;">
+            <div style="width: 40px; height: 40px; background-color: #2A2A2A; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 16px; flex-shrink: 0;">
+                <i class="fas fa-bullhorn" style="font-size: 1.1rem; color: #E0E0E0;"></i>
+            </div>
+            <div>
+                <div style="color: #AAAAAA; font-size: 0.85rem; margin-bottom: 4px;">Канал</div>
+                <a href="https://t.me/refindchannel" style="color: #FFFFFF; font-size: 1rem; font-weight: 500; text-decoration: none; display: flex; align-items: center;">@refindchannel</a>
+            </div>
+        </div>
+    </div>
+    
+    <a href="https://t.me/refindbot" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background-color: #2A2A2A; border-radius: 12px; text-decoration: none; color: #FFFFFF; font-weight: 500; border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease;">
+        <span style="display: flex; align-items: center;">
+            <i class="fab fa-telegram" style="font-size: 1.2rem; margin-right: 12px;"></i>
+            Получить доступ к API
+        </span>
+        <i class="fas fa-arrow-right" style="font-size: 0.9rem;"></i>
+    </a>
+</div>
+</div>
+</div>
+
+<div class="api-section" id="basic-info-section">
+<h2 class="api-section-title">Основная информация</h2>
+    <p class="section-description" style="color: rgba(255, 255, 255, 0.7); margin-bottom: 2rem; max-width: 800px; line-height: 1.6;">
+        ReFind API предоставляет доступ к базе данных утечек для поиска информации по номерам телефонов.
+        Ниже приведены основные сведения о работе с API и ключевые эндпоинты.
+    </p>
+    
+    <div class="info-grid" style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 3rem;">
+        <div class="info-card basic-info" style="background-color: rgba(22, 22, 22, 0.7); border-radius: 12px; padding: 1.8rem; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start;">
+            <div class="info-card-icon" style="background-color: rgba(160, 160, 160, 0.15); color: #e0e0e0; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-right: 1rem; flex-shrink: 0;">
+                <i class="fas fa-server"></i>
+    </div>
+            <div class="info-card-content" style="flex-grow: 1;">
+                <h4 style="margin-top: 0; margin-bottom: 0.8rem; font-size: 1.2rem; color: #fff;">Базовый URL API</h4>
+                <p style="margin: 0 0 1rem; color: rgba(255, 255, 255, 0.7);">Все запросы к API должны отправляться на базовый URL:</p>
+                <div class="api-url-box" style="background-color: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 12px; margin: 10px 0; position: relative; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <code class="secured-url" style="font-family: 'Roboto Mono', monospace; font-weight: 500; color: rgba(255, 255, 255, 0.8); display: block; padding: 0; text-align: center;">https://<script>document.write(window.location.hostname)</script></code>
+    </div>
+</div>
+</div>
+
+        <div class="info-card auth-info" style="background-color: rgba(22, 22, 22, 0.7); border-radius: 12px; padding: 1.8rem; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start;">
+            <div class="info-card-icon" style="background-color: rgba(160, 160, 160, 0.15); color: #e0e0e0; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-right: 1rem; flex-shrink: 0;">
+                <i class="fas fa-key"></i>
+            </div>
+            <div class="info-card-content" style="flex-grow: 1;">
+                <h4 style="margin-top: 0; margin-bottom: 0.8rem; font-size: 1.2rem; color: #fff;">Аутентификация</h4>
+                <p style="margin: 0 0 1rem; color: rgba(255, 255, 255, 0.7);">Для доступа к API необходимо использовать API ключ, который передается в заголовке <code style="font-family: 'Roboto Mono', monospace;">X-API-Key</code>:</p>
+                <div class="code-example" style="background-color: #1A1A1A; border-radius: 8px; overflow: hidden; margin: 20px 0; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+                    <div class="code-example-header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background-color: #252525; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <span class="code-example-title" style="font-size: 0.85rem; font-weight: 500; color: rgba(255, 255, 255, 0.7);">Пример аутентификации</span>
+                        <div class="code-example-actions" style="display: flex; gap: 10px;">
+                            <span class="code-example-action code-action-red" style="width: 12px; height: 12px; border-radius: 50%; background-color: #5f5f5f;"></span>
+                            <span class="code-example-action code-action-yellow" style="width: 12px; height: 12px; border-radius: 50%; background-color: #7a7a7a;"></span>
+                            <span class="code-example-action code-action-green" style="width: 12px; height: 12px; border-radius: 50%; background-color: #939393;"></span>
+                        </div>
+                    </div>
+                    <pre style="padding: 16px; margin: 0; overflow-x: auto; font-family: 'Roboto Mono', monospace; line-height: 1.5; tab-size: 4; font-size: 14px; white-space: pre-wrap; word-break: break-word;"><span class="code-line" style="display: block; padding: 2px 0;"><span class="code-method" style="color: #e0e0e0; font-weight: bold;">curl</span> -X GET <span class="code-string" style="color: #c0c0c0;">"https://<script>document.write(window.location.hostname)</script>/search?phone=79991234567"</span> \</span>
+<span class="code-line" style="display: block; padding: 2px 0;">     -H <span class="code-string" style="color: #c0c0c0;">"X-API-Key: ваш_api_ключ"</span></span></pre>
+</div>
+</div>
+</div>
+
+        <div class="info-card format-info" style="background-color: rgba(22, 22, 22, 0.7); border-radius: 12px; padding: 1.8rem; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start;">
+            <div class="info-card-icon" style="background-color: rgba(160, 160, 160, 0.15); color: #e0e0e0; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-right: 1rem; flex-shrink: 0;">
+                <i class="fas fa-phone-alt"></i>
+</div>
+            <div class="info-card-content" style="flex-grow: 1;">
+                <h4 style="margin-top: 0; margin-bottom: 0.8rem; font-size: 1.2rem; color: #fff;">Формат номера телефона</h4>
+                <p style="margin: 0 0 1rem; color: rgba(255, 255, 255, 0.7);">API поддерживает поиск только по российским номерам телефонов в следующих форматах:</p>
+                <ul class="format-list" style="list-style-type: none; padding-left: 0; margin-bottom: 1rem;">
+                    <li style="margin-bottom: 0.5rem; color: rgba(255, 255, 255, 0.7);"><code style="font-family: 'Roboto Mono', monospace; background-color: rgba(0, 0, 0, 0.2); padding: 2px 6px; border-radius: 4px;">7XXXXXXXXXX</code> — 11 цифр, начиная с 7</li>
+                    <li style="margin-bottom: 0.5rem; color: rgba(255, 255, 255, 0.7);"><code style="font-family: 'Roboto Mono', monospace; background-color: rgba(0, 0, 0, 0.2); padding: 2px 6px; border-radius: 4px;">89XXXXXXXX</code> — 10 цифр, начиная с 9 (автоматически преобразуется в формат с 7)</li>
+                </ul>
+                <p style="margin: 0; color: rgba(255, 255, 255, 0.7);">Примеры корректных номеров: <code style="font-family: 'Roboto Mono', monospace; background-color: rgba(0, 0, 0, 0.2); padding: 2px 6px; border-radius: 4px;">79991234567</code>, <code style="font-family: 'Roboto Mono', monospace; background-color: rgba(0, 0, 0, 0.2); padding: 2px 6px; border-radius: 4px;">89991234567</code></p>
+            </div>
+        </div>
+        
+        <div class="info-card limits-info" style="background-color: rgba(22, 22, 22, 0.7); border-radius: 12px; padding: 1.8rem; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start;">
+            <div class="info-card-icon" style="background-color: rgba(160, 160, 160, 0.15); color: #e0e0e0; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-right: 1rem; flex-shrink: 0;">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <div class="info-card-content" style="flex-grow: 1;">
+                <h4 style="margin-top: 0; margin-bottom: 0.8rem; font-size: 1.2rem; color: #fff;">Лимиты запросов</h4>
+                <p style="margin: 0 0 1rem; color: rgba(255, 255, 255, 0.7);">Количество запросов зависит от типа вашего API ключа:</p>
+                <ul class="limits-list" style="list-style-type: none; padding-left: 0;">
+                    <li style="margin-bottom: 0.5rem; color: rgba(255, 255, 255, 0.7);"><strong>Infinite</strong>: Без ограничений</li>
+                    <li style="margin-bottom: 0.5rem; color: rgba(255, 255, 255, 0.7);"><strong>Requests</strong>: Лимит запросов от 50 до 1000 в зависимости от тарифа</li>
+                    <li style="color: rgba(255, 255, 255, 0.7);"><strong>Both</strong>: Ограниченное количество запросов</li>
+                </ul>
+            </div>
+            </div>
+</div>
+</div>
+</div>
+
+<div class="api-section" id="search-section">
+    <h2 class="api-section-title">Поиск по номеру телефона</h2>
+    <div class="api-endpoint" style="background-color: rgba(22, 22, 22, 0.7); border-radius: 12px; padding: 1.8rem; margin-bottom: 2.2rem; border: 1px solid rgba(255, 255, 255, 0.08); transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); text-align: left; margin-left: auto; margin-right: auto; max-width: 900px;">
+        <span class="endpoint-method method-get" style="display: inline-block; padding: 5px 10px; border-radius: 4px; font-weight: 600; font-size: 0.9rem; margin-right: 10px; font-family: 'Roboto Mono', monospace; text-align: left; background-color: rgba(160, 160, 160, 0.15); color: #e0e0e0;">GET</span>
+        <span class="endpoint-url" style="font-family: 'Roboto Mono', monospace; font-weight: 500; font-size: 1.1rem; word-break: break-all; text-align: left;">/search?phone=<span style="color: #e0e0e0; font-style: italic;">номер_телефона</span></span>
+        <p class="endpoint-description" style="margin: 1rem 0; color: rgba(255, 255, 255, 0.8); line-height: 1.5; text-align: left;">Поиск информации по номеру телефона в базах данных утечек.</p>
+
+        <div class="endpoint-params" style="margin-bottom: 2rem; text-align: left;">
+            <h3 class="param-title" style="font-size: 1.1rem; margin-bottom: 1rem; color: rgba(255, 255, 255, 0.9); font-weight: 600; text-align: center;">Параметры запроса</h3>
+            <div class="param-table" style="width: 100%; border-collapse: separate; border-spacing: 0; overflow-x: auto; display: block; text-align: left; margin-bottom: 1.5rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); margin-left: auto; margin-right: auto; max-width: 900px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="background-color: rgba(30, 30, 30, 0.8);">
+                        <tr>
+                            <th style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">ПАРАМЕТР</th>
+                            <th style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">ТИП</th>
+                            <th style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">ОБЯЗАТЕЛЬНЫЙ</th>
+                            <th style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">ОПИСАНИЕ</th>
+</tr>
+</thead>
+<tbody>
+                        <tr style="transition: background-color 0.2s ease;">
+                            <td style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8);">phone</td>
+                            <td style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8);">string</td>
+                            <td style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8);"><span style="display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; background-color: rgba(160, 160, 160, 0.15); color: #e0e0e0; font-weight: 600; text-align: center;">Да</span></td>
+                            <td style="padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8);">Номер телефона в формате 7XXXXXXXXXX (только цифры, без символов)</td>
+</tr>
+                        <tr style="transition: background-color 0.2s ease;">
+                            <td style="padding: 12px 15px; text-align: left; color: rgba(255, 255, 255, 0.8);">full</td>
+                            <td style="padding: 12px 15px; text-align: left; color: rgba(255, 255, 255, 0.8);">boolean</td>
+                            <td style="padding: 12px 15px; text-align: left; color: rgba(255, 255, 255, 0.8);"><span style="display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; background-color: rgba(160, 160, 160, 0.15); color: #a0a0a0; font-weight: 600; text-align: center;">Нет</span></td>
+                            <td style="padding: 12px 15px; text-align: left; color: rgba(255, 255, 255, 0.8);">Если true, возвращает полную информацию без маскирования данных (только для ключей с расширенным доступом)</td>
+</tr>
+</tbody>
+</table>
+            </div>
+</div>
+
+        <div class="code-example" style="background-color: #1A1A1A; border-radius: 8px; overflow: hidden; margin: 20px 0; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+            <div class="code-example-header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background-color: #252525; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <span class="code-example-title" style="font-size: 0.85rem; font-weight: 500; color: rgba(255, 255, 255, 0.7);">Пример запроса</span>
+                <div class="code-example-actions" style="display: flex; gap: 10px;">
+                    <span class="code-example-action code-action-red" style="width: 12px; height: 12px; border-radius: 50%; background-color: #5f5f5f;"></span>
+                    <span class="code-example-action code-action-yellow" style="width: 12px; height: 12px; border-radius: 50%; background-color: #7a7a7a;"></span>
+                    <span class="code-example-action code-action-green" style="width: 12px; height: 12px; border-radius: 50%; background-color: #939393;"></span>
+                </div>
+            </div>
+            <pre style="padding: 16px; margin: 0; overflow-x: auto; font-family: 'Roboto Mono', monospace; line-height: 1.5; tab-size: 4; font-size: 14px; white-space: pre-wrap; word-break: break-word;"><span style="display: block; padding: 2px 0;"><span style="color: #e0e0e0; font-weight: bold;">curl</span> -X GET <span style="color: #c0c0c0;">"https://<script>document.write(window.location.hostname)</script>/search?phone=79991234567"</span> \</span>
+<span style="display: block; padding: 2px 0;">     -H <span style="color: #c0c0c0;">"X-API-Key: ваш_api_ключ"</span></span></pre>
+</div>
+
+        <div class="response-example" style="margin-top: 2rem; text-align: left;">
+            <h3 class="param-title" style="font-size: 1.1rem; margin-bottom: 1rem; color: rgba(255, 255, 255, 0.9); font-weight: 600; text-align: center;">Пример ответа</h3>
+            
+            <div class="api-response-container" style="background-color: rgba(22, 22, 22, 0.7); border-radius: 10px; margin-top: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); overflow: hidden;">
+                <div class="api-response-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background-color: rgba(30, 30, 30, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div class="api-response-title" style="font-size: 0.9rem; font-weight: 600; color: rgba(255, 255, 255, 0.9); display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-check-circle" style="color: #a0a0a0; font-size: 0.9rem;"></i>
+                        Успешный ответ
+</div>
+                    <span class="api-response-status" style="font-size: 0.8rem; padding: 3px 8px; border-radius: 4px; background-color: rgba(160, 160, 160, 0.1); color: #e0e0e0;">200 OK</span>
+</div>
+
+                <div class="api-response-body" style="padding: 16px;">
+                    <div class="code-example" style="background-color: #1A1A1A; border-radius: 8px; overflow: hidden; margin: 0; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+                        <pre style="padding: 16px; margin: 0; overflow-x: auto; font-family: 'Roboto Mono', monospace; line-height: 1.5; tab-size: 4; font-size: 14px; white-space: pre-wrap; word-break: break-word;"><span style="display: block; padding: 2px 0;">{</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"t"</span>: <span style="color: #c0c0c0;">"+79999999999"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"u"</span>: <span style="color: #c0c0c0;">"muhammadebzaev"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"id"</span>: <span style="color: #d0d0d0;">3141657989</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"database"</span>: <span style="color: #a0a0a0;">"ИнстаграмПарсинг"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"explain"</span>: <span style="color: #c0c0c0;">"Неизвестная утечка"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"results"</span>: [</span>
+<span style="display: block; padding: 2px 0;">    {</span>
+<span style="display: block; padding: 2px 0;">      <span style="color: #e0e0e0; font-weight: 500;">"database"</span>: <span style="color: #c0c0c0;">"VK 2019"</span>,</span>
+<span style="display: block; padding: 2px 0;">      <span style="color: #e0e0e0; font-weight: 500;">"source"</span>: <span style="color: #c0c0c0;">"Утечка данных ВКонтакте 2019"</span>,</span>
+<span style="display: block; padding: 2px 0;">      <span style="color: #e0e0e0; font-weight: 500;">"data"</span>: {</span>
+<span style="display: block; padding: 2px 0;">        <span style="color: #e0e0e0; font-weight: 500;">"name"</span>: <span style="color: #c0c0c0;">"Иван"</span>,</span>
+<span style="display: block; padding: 2px 0;">        <span style="color: #e0e0e0; font-weight: 500;">"surname"</span>: <span style="color: #c0c0c0;">"Ива***"</span>,</span>
+<span style="display: block; padding: 2px 0;">        <span style="color: #e0e0e0; font-weight: 500;">"email"</span>: <span style="color: #c0c0c0;">"iva***@***il.com"</span>,</span>
+<span style="display: block; padding: 2px 0;">        <span style="color: #e0e0e0; font-weight: 500;">"vk_id"</span>: <span style="color: #c0c0c0;">"id****234"</span>,</span>
+<span style="display: block; padding: 2px 0;">        <span style="color: #e0e0e0; font-weight: 500;">"city"</span>: <span style="color: #c0c0c0;">"Москва"</span></span>
+<span style="display: block; padding: 2px 0;">      }</span>
+<span style="display: block; padding: 2px 0;">    },</span>
+<span style="display: block; padding: 2px 0;">  ],</span>
+<span style="display: block; padding: 2px 0;">}</span></pre>
+</div>
+                        </div>
+</div>
+
+            <div class="api-response-container" style="background-color: rgba(22, 22, 22, 0.7); border-radius: 10px; margin-top: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); overflow: hidden;">
+                <div class="api-response-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background-color: rgba(30, 30, 30, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div class="api-response-title" style="font-size: 0.9rem; font-weight: 600; color: rgba(255, 255, 255, 0.9); display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-info-circle" style="color: #a0a0a0; font-size: 0.9rem;"></i>
+                    Ответ, если данные не найдены
+                </div>
+                    <span class="api-response-status" style="font-size: 0.8rem; padding: 3px 8px; border-radius: 4px; background-color: rgba(160, 160, 160, 0.1); color: #e0e0e0;">200 OK</span>
+            </div>
+                <div class="api-response-body" style="padding: 16px;">
+                    <div class="code-example" style="background-color: #1A1A1A; border-radius: 8px; overflow: hidden; margin: 0; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+                        <pre style="padding: 16px; margin: 0; overflow-x: auto; font-family: 'Roboto Mono', monospace; line-height: 1.5; tab-size: 4; font-size: 14px; white-space: pre-wrap; word-break: break-word;"><span style="display: block; padding: 2px 0;">{</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"results"</span>: <span style="color: #c0c0c0;">[]</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"analysis"</span>: <span style="color: #b0b0b0;">null</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"execution_time"</span>: <span style="color: #a0a0a0;">0....</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"remaining_requests"</span>: <span style="color: #a0a0a0;">"Unlimited"</span></span>
+<span style="display: block; padding: 2px 0;">}</span></pre>
+                </div>
+            </div>
+</div>
+
+            <div class="api-response-container" style="background-color: rgba(22, 22, 22, 0.7); border-radius: 10px; margin-top: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); overflow: hidden;">
+                <div class="api-response-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background-color: rgba(30, 30, 30, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div class="api-response-title" style="font-size: 0.9rem; font-weight: 600; color: rgba(255, 255, 255, 0.9); display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-exclamation-circle" style="color: #a0a0a0; font-size: 0.9rem;"></i>
+                    Ответ с ошибкой
+                </div>
+                    <span class="api-response-status" style="font-size: 0.8rem; padding: 3px 8px; border-radius: 4px; background-color: rgba(160, 160, 160, 0.1); color: #e0e0e0;">400 Bad Request</span>
+            </div>
+                <div class="api-response-body" style="padding: 16px;">
+                    <div class="code-example" style="background-color: #1A1A1A; border-radius: 8px; overflow: hidden; margin: 0; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+                        <pre style="padding: 16px; margin: 0; overflow-x: auto; font-family: 'Roboto Mono', monospace; line-height: 1.5; tab-size: 4; font-size: 14px; white-space: pre-wrap; word-break: break-word;"><span style="display: block; padding: 2px 0;">{</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"status"</span>: <span style="color: #c0c0c0;">"error"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"code"</span>: <span style="color: #a0a0a0;">400</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"message"</span>: <span style="color: #c0c0c0;">"Неверный формат номера телефона. Используйте формат 7XXXXXXXXXX"</span></span>
+<span style="display: block; padding: 2px 0;">}</span></pre>
+                </div>
+</div>
+</div>
+</div>
+</div>
+    </div>
+</div>
+
+<div class="api-section" id="errors-section">
+<h2 class="api-section-title">Коды ошибок</h2>
+    <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 2rem; max-width: 800px; line-height: 1.6; text-align: center; margin-left: auto; margin-right: auto;">
+        При работе с API могут возникать различные ошибки. Ниже приведен список кодов ошибок и их описание.
+    </p>
+    
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; max-width: 900px; margin-left: auto; margin-right: auto;">
+        <div style="display: flex; background-color: rgba(22, 22, 22, 0.7); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: center; min-width: 100px; font-size: 2.5rem; font-weight: 700; color: rgba(255, 255, 255, 0.15); background-color: rgba(20, 20, 20, 0.8); padding: 1.5rem; letter-spacing: -1px;">400</div>
+            <div style="padding: 1.5rem; flex-grow: 1;">
+                <h4 style="margin-top: 0; margin-bottom: 0.8rem; font-size: 1.2rem; color: rgba(255, 255, 255, 0.9);">Bad Request</h4>
+                <p style="margin: 0 0 1rem 0; color: rgba(255, 255, 255, 0.7); font-size: 0.95rem; line-height: 1.5;">Неверный формат запроса. Проверьте параметры и формат данных.</p>
+                <div style="margin-top: 1rem;">
+                    <div style="background-color: #1A1A1A; border-radius: 8px; overflow: hidden; margin: 0; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+                        <pre style="padding: 16px; margin: 0; overflow-x: auto; font-family: 'Roboto Mono', monospace; line-height: 1.5; tab-size: 4; font-size: 14px; white-space: pre-wrap; word-break: break-word;"><span style="display: block; padding: 2px 0;">{</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"status"</span>: <span style="color: #c0c0c0;">"error"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"code"</span>: <span style="color: #a0a0a0;">400</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"message"</span>: <span style="color: #c0c0c0;">"Неверный формат номера телефона"</span></span>
+<span style="display: block; padding: 2px 0;">}</span></pre>
+                    </div>
+                </div>
+</div>
+</div>
+
+        <div style="display: flex; background-color: rgba(22, 22, 22, 0.7); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: center; min-width: 100px; font-size: 2.5rem; font-weight: 700; color: rgba(255, 255, 255, 0.15); background-color: rgba(20, 20, 20, 0.8); padding: 1.5rem; letter-spacing: -1px;">401</div>
+            <div style="padding: 1.5rem; flex-grow: 1;">
+                <h4 style="margin-top: 0; margin-bottom: 0.8rem; font-size: 1.2rem; color: rgba(255, 255, 255, 0.9);">Unauthorized</h4>
+                <p style="margin: 0 0 1rem 0; color: rgba(255, 255, 255, 0.7); font-size: 0.95rem; line-height: 1.5;">Недействительный или просроченный API ключ. Проверьте ключ или получите новый.</p>
+                <div style="margin-top: 1rem;">
+                    <div style="background-color: #1A1A1A; border-radius: 8px; overflow: hidden; margin: 0; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+                        <pre style="padding: 16px; margin: 0; overflow-x: auto; font-family: 'Roboto Mono', monospace; line-height: 1.5; tab-size: 4; font-size: 14px; white-space: pre-wrap; word-break: break-word;"><span style="display: block; padding: 2px 0;">{</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"status"</span>: <span style="color: #c0c0c0;">"error"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"code"</span>: <span style="color: #a0a0a0;">401</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"message"</span>: <span style="color: #c0c0c0;">"Недействительный API ключ"</span></span>
+<span style="display: block; padding: 2px 0;">}</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; background-color: rgba(22, 22, 22, 0.7); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: center; min-width: 100px; font-size: 2.5rem; font-weight: 700; color: rgba(255, 255, 255, 0.15); background-color: rgba(20, 20, 20, 0.8); padding: 1.5rem; letter-spacing: -1px;">403</div>
+            <div style="padding: 1.5rem; flex-grow: 1;">
+                <h4 style="margin-top: 0; margin-bottom: 0.8rem; font-size: 1.2rem; color: rgba(255, 255, 255, 0.9);">Forbidden</h4>
+                <p style="margin: 0 0 1rem 0; color: rgba(255, 255, 255, 0.7); font-size: 0.95rem; line-height: 1.5;">Недостаточно прав для выполнения запроса или превышен лимит запросов.</p>
+                <div style="margin-top: 1rem;">
+                    <div style="background-color: #1A1A1A; border-radius: 8px; overflow: hidden; margin: 0; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+                        <pre style="padding: 16px; margin: 0; overflow-x: auto; font-family: 'Roboto Mono', monospace; line-height: 1.5; tab-size: 4; font-size: 14px; white-space: pre-wrap; word-break: break-word;"><span style="display: block; padding: 2px 0;">{</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"status"</span>: <span style="color: #c0c0c0;">"error"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"code"</span>: <span style="color: #a0a0a0;">403</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"message"</span>: <span style="color: #c0c0c0;">"Превышен лимит запросов"</span></span>
+<span style="display: block; padding: 2px 0;">}</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; background-color: rgba(22, 22, 22, 0.7); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: center; min-width: 100px; font-size: 2.5rem; font-weight: 700; color: rgba(255, 255, 255, 0.15); background-color: rgba(20, 20, 20, 0.8); padding: 1.5rem; letter-spacing: -1px;">429</div>
+            <div style="padding: 1.5rem; flex-grow: 1;">
+                <h4 style="margin-top: 0; margin-bottom: 0.8rem; font-size: 1.2rem; color: rgba(255, 255, 255, 0.9);">Too Many Requests</h4>
+                <p style="margin: 0 0 1rem 0; color: rgba(255, 255, 255, 0.7); font-size: 0.95rem; line-height: 1.5;">Слишком много запросов за короткий промежуток времени. Повторите попытку позже.</p>
+                <div style="margin-top: 1rem;">
+                    <div style="background-color: #1A1A1A; border-radius: 8px; overflow: hidden; margin: 0; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+                        <pre style="padding: 16px; margin: 0; overflow-x: auto; font-family: 'Roboto Mono', monospace; line-height: 1.5; tab-size: 4; font-size: 14px; white-space: pre-wrap; word-break: break-word;"><span style="display: block; padding: 2px 0;">{</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"status"</span>: <span style="color: #c0c0c0;">"error"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"code"</span>: <span style="color: #a0a0a0;">429</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"message"</span>: <span style="color: #c0c0c0;">"Слишком много запросов"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"retry_after"</span>: <span style="color: #a0a0a0;">60</span></span>
+<span style="display: block; padding: 2px 0;">}</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; background-color: rgba(22, 22, 22, 0.7); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: center; min-width: 100px; font-size: 2.5rem; font-weight: 700; color: rgba(255, 255, 255, 0.15); background-color: rgba(20, 20, 20, 0.8); padding: 1.5rem; letter-spacing: -1px;">500</div>
+            <div style="padding: 1.5rem; flex-grow: 1;">
+                <h4 style="margin-top: 0; margin-bottom: 0.8rem; font-size: 1.2rem; color: rgba(255, 255, 255, 0.9);">Internal Server Error</h4>
+                <p style="margin: 0 0 1rem 0; color: rgba(255, 255, 255, 0.7); font-size: 0.95rem; line-height: 1.5;">Внутренняя ошибка сервера. Повторите попытку позже или обратитесь в поддержку.</p>
+                <div style="margin-top: 1rem;">
+                    <div style="background-color: #1A1A1A; border-radius: 8px; overflow: hidden; margin: 0; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+                        <pre style="padding: 16px; margin: 0; overflow-x: auto; font-family: 'Roboto Mono', monospace; line-height: 1.5; tab-size: 4; font-size: 14px; white-space: pre-wrap; word-break: break-word;"><span style="display: block; padding: 2px 0;">{</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"status"</span>: <span style="color: #c0c0c0;">"error"</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"code"</span>: <span style="color: #a0a0a0;">500</span>,</span>
+<span style="display: block; padding: 2px 0;">  <span style="color: #e0e0e0; font-weight: 500;">"message"</span>: <span style="color: #c0c0c0;">"Внутренняя ошибка сервера"</span></span>
+<span style="display: block; padding: 2px 0;">}</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="scrollToTop" style="position: fixed; bottom: 20px; right: 20px; width: 45px; height: 45px; background-color: rgba(25, 25, 25, 0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 99; opacity: 0; visibility: hidden; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);">
+    <i class="fas fa-arrow-up" style="color: #FFFFFF;"></i>
+</div>
+
+<!-- Мобильное меню -->
+<div id="mobile-menu" class="mobile-menu" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(10, 10, 10, 0.97); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+    <div class="close-menu" style="position: absolute; top: 20px; right: 20px; font-size: 24px; color: white; cursor: pointer;">
+        <i class="fas fa-times"></i>
+    </div>
+    <div class="mobile-menu-items" style="display: flex; flex-direction: column; gap: 20px; text-align: center;">
+        <a href="/" class="mobile-menu-item" style="color: white; text-decoration: none; font-size: 1.2rem; padding: 10px; transition: all 0.3s ease;">Главная</a>
+        <a href="/news.html" class="mobile-menu-item" style="color: white; text-decoration: none; font-size: 1.2rem; padding: 10px; transition: all 0.3s ease;">Новости</a>
+        <a href="/api.html" class="mobile-menu-item" style="color: white; text-decoration: none; font-size: 1.2rem; padding: 10px; transition: all 0.3s ease; font-weight: bold;">API</a>
+        <a href="/search.html" class="mobile-menu-item" style="color: white; text-decoration: none; font-size: 1.2rem; padding: 10px; transition: all 0.3s ease;">Поиск</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Настройка адаптивности и управления прокруткой
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    // Обработка кнопки прокрутки вверх
+    const scrollToTopBtn = document.getElementById('scrollToTop');
+    
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            scrollToTopBtn.style.opacity = '1';
+            scrollToTopBtn.style.visibility = 'visible';
+        } else {
+            scrollToTopBtn.style.opacity = '0';
+            scrollToTopBtn.style.visibility = 'hidden';
+        }
+        
+        const navbar = document.querySelector('.navbar');
+        if (window.pageYOffset > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+                }
+            });
+
+            scrollToTopBtn.addEventListener('click', function() {
+        if (reducedMotion) {
+            window.scrollTo(0, 0);
+        } else {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+            });
+        }
+    });
+
+    // Мобильное меню
+        const menuBar = document.getElementById('Menu-bar');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const closeMenu = document.querySelector('.close-menu');
+        
+        if (menuBar) {
+        menuBar.addEventListener('click', function() {
+            mobileMenu.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+        });
+    }
+    
+    if (closeMenu) {
+        closeMenu.addEventListener('click', function() {
+            mobileMenu.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+    }
+    
+    // Медиа-запрос для мобильных устройств
+    const handleResize = () => {
+        if (window.innerWidth <= 768) {
+            if (menuBar) menuBar.style.display = 'block';
+            const desktopMenu = document.querySelector('.desktop-menu');
+            if (desktopMenu) desktopMenu.style.display = 'none';
+                    } else {
+            if (menuBar) menuBar.style.display = 'none';
+            const desktopMenu = document.querySelector('.desktop-menu');
+            if (desktopMenu) desktopMenu.style.display = 'flex';
+            // Скрываем мобильное меню при расширении экрана
+            mobileMenu.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Вызываем функцию при загрузке страницы
+    });
+</script>
+</div>
+</body>
+</html> 

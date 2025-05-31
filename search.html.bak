@@ -1,0 +1,3245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<script src="/js/mobile-redirect.js"></script>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Поиск | ReFind</title>
+<meta name="description" content="Поиск информации из базы данных утечек"/>
+<meta name="theme-color" content="#121212"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="format-detection" content="telephone=no"/>
+<meta name="robots" content="index, follow"/>
+<!-- Безопасность -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta name="referrer" content="no-referrer">
+<!-- Cloudflare защита -->
+<script type="text/javascript">
+(function(){
+    // Проверка на наличие Cloudflare
+    if (typeof window.__cfRLUnblockHandlers === 'undefined') {
+        window.__cfRLUnblockHandlers = true;
+    }
+    
+    // Базовая защита от скриптовых атак
+    window.addEventListener('error', function(e) {
+        if (e && e.target && (e.target.src || e.target.href)) {
+            var blockedResources = [
+                'favicon.ico', 'api.js', 'gtm.js', 'fbevents.js',
+                'analytics', 'track', 'pixel', 'collect'
+            ];
+            var resource = e.target.src || e.target.href;
+            for (var i = 0; i < blockedResources.length; i++) {
+                if (resource.indexOf(blockedResources[i]) !== -1) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        }
+    }, true);
+    
+    // Защита от трекинга
+    if (navigator.doNotTrack !== '1' && window.location.protocol === 'https:') {
+        var d = document.createElement('link');
+        d.rel = 'dns-prefetch';
+        d.href = '//cloudflare-dns.com';
+        document.head.appendChild(d);
+    }
+})();
+</script>
+<!-- Cloudflare Web Analytics -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "xxxx-xxxx-xxxx"}'></script>
+<!-- End Cloudflare Web Analytics -->
+
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"></noscript>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<script src="/js/config.js"></script>
+<script src="/js/api-helper.js"></script>
+<script defer src="/js/script.js"></script>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+    /* Основные стили с обновленными шрифтами */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Montserrat', sans-serif;
+    }
+    
+    body {
+        background-color: #0A0A0A;
+        color: #FFF;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        line-height: 1.6;
+        text-rendering: optimizeSpeed;
+    }
+    
+    /* Навигационная панель с обновленным стилем */
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        background-color: rgba(12, 12, 12, 0.85);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .navbar.scrolled {
+        padding: 12px 24px;
+        background-color: rgba(10, 10, 10, 0.9);
+    }
+    
+    .navbar a img.ref {
+        height: 48px;
+        object-fit: contain;
+        max-width: 100%;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .navbar.scrolled a img.ref {
+        height: 40px;
+    }
+    
+    .desktop-menu {
+        display: flex;
+        gap: 16px;
+        margin-left: auto;
+    }
+    
+    .nav-button {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #121212;
+        color: #FFF;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        letter-spacing: 0.3px;
+    }
+    
+    .nav-button:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    .nav-button.active {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+    
+    /* Мобильное меню с улучшенным дизайном */
+    .menu-data {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        height: 100vh;
+        background-color: rgba(10, 10, 10, 0.98);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        z-index: 999;
+        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-top: 80px;
+        transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .menu-data.active {
+        right: 0;
+        display: flex;
+    }
+    
+    .menu-data a {
+        display: block;
+        margin: 15px 25px;
+        font-size: 1.2rem;
+        text-align: center;
+        padding: 12px 15px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+        color: #fff;
+        text-decoration: none;
+        letter-spacing: 0.5px;
+    }
+    
+    .menu-data a:hover, .menu-data a:active {
+        background-color: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+    
+    #Menu-bar {
+        display: none;
+        cursor: pointer;
+        font-size: 1.5rem;
+        padding: 10px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+    
+    /* Стили для раскрывающегося текста */
+    .expand-btn, .collapse-btn {
+        display: inline-block;
+        background: none;
+        border: none;
+        font-size: 12px;
+        color: #aaa;
+        cursor: pointer;
+        margin-left: 5px;
+        padding: 2px 5px;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+    }
+    
+    .expand-btn:hover, .collapse-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+    
+    .expand-btn:focus, .collapse-btn:focus {
+        outline: none;
+    }
+    
+    .short-text, .full-text {
+        word-break: break-word;
+    }
+    
+    .full-text {
+        color: #fff;
+    }
+    
+    /* Обновленные стили для основного контента страницы поиска */
+    .hero-section {
+        flex: 1;
+        background: #0A0A0A;
+        display: flex;
+        flex-direction: column;
+        padding-top: 80px;
+        position: relative;
+        min-height: 100vh;
+    }
+    
+    .search-container {
+        width: 90%;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem 0;
+    }
+    
+    .search-form {
+        background-color: rgba(25, 25, 25, 0.2);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .search-input-group {
+        position: relative;
+        display: flex;
+        margin-bottom: 0.8rem;
+    }
+    
+    .search-input {
+        flex: 1;
+        padding: 16px 18px;
+        background-color: rgba(15, 15, 15, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px 0 0 8px;
+        color: #FFF;
+        font-size: 1.05rem;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        font-family: 'Montserrat', sans-serif;
+        letter-spacing: 0.3px;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+    }
+    
+    .search-button {
+        padding: 16px 24px;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #FFF;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0 8px 8px 0;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        letter-spacing: 0.5px;
+    }
+    
+    .search-button:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+    }
+    
+    .search-error {
+        color: #FF6B6B;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        display: none;
+    }
+    
+    .search-hint {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        letter-spacing: 0.2px;
+    }
+    
+    .search-limit-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+    }
+    
+    .search-limit-indicator {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .search-limit-count {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+    }
+    
+    /* Улучшенные стили для результатов поиска */
+    .search-results {
+        background-color: rgba(22, 22, 22, 0.6);
+        border-radius: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        padding: 35px;
+        margin-bottom: 2.5rem;
+        display: none;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        max-width: 1100px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Улучшенные стили для заголовка результатов */
+    .results-header {
+        margin-bottom: 1.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+        background-color: rgba(18, 18, 18, 0.5);
+        padding: 18px 22px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .results-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        letter-spacing: 0.5px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .results-title i {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1.1rem;
+    }
+    
+    /* Улучшенные стили для информационных сообщений */
+    .info-message {
+        display: flex;
+        background-color: rgba(35, 35, 35, 0.5);
+        border-left: 3px solid rgba(150, 150, 150, 0.5);
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.25s ease-in-out;
+    }
+    
+    .info-message:hover {
+        background-color: rgba(40, 40, 40, 0.6);
+        border-left-color: rgba(150, 150, 150, 0.7);
+        transform: translateY(-2px);
+    }
+    
+    .info-icon {
+        flex: 0 0 35px;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.7);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 2px;
+    }
+    
+    .info-text {
+        flex: 1;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    /* Улучшенные стили для bot-name и channel-name */
+    .bot-name, .channel-name {
+        display: inline-block;
+        color: #fff;
+        font-weight: 500;
+        background-color: rgba(40, 40, 40, 0.8);
+        padding: 3px 8px;
+        border-radius: 4px;
+        letter-spacing: 0.3px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .bot-name:hover, .channel-name:hover {
+        background-color: rgba(50, 50, 50, 0.9);
+        transform: translateY(-1px);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .channel-info {
+        margin-left: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    /* Улучшенные стили карточек результатов */
+    .result-item {
+        background-color: rgba(26, 26, 26, 0.8);
+        border-radius: 14px;
+        margin-bottom: 30px;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity: 0;
+        transform: translateY(15px);
+        animation: fadeInUp 0.4s forwards;
+        padding: 30px;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+    }
+    
+    .result-item:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+        border-color: rgba(255, 255, 255, 0.25);
+        background-color: rgba(35, 35, 35, 0.8);
+    }
+    
+    /* Улучшенная анимация появления */
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .result-item:nth-child(1) { animation-delay: 0.05s; }
+    .result-item:nth-child(2) { animation-delay: 0.1s; }
+    .result-item:nth-child(3) { animation-delay: 0.15s; }
+    .result-item:nth-child(4) { animation-delay: 0.2s; }
+    .result-item:nth-child(5) { animation-delay: 0.25s; }
+    .result-item:nth-child(6) { animation-delay: 0.3s; }
+    
+    .result-item:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        border-color: rgba(255, 255, 255, 0.12); /* Уменьшена яркость обводки при наведении */
+        background-color: rgba(28, 28, 28, 0.5);
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .result-header {
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding-bottom: 15px;
+    }
+    
+    .result-database {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.6rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        letter-spacing: 0.5px;
+    }
+    
+    .result-description {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95rem;
+        letter-spacing: 0.2px;
+        line-height: 1.5;
+        margin-bottom: 1.2rem;
+    }
+    
+    .result-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+    }
+    
+    .detail-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 0;
+        padding: 16px 20px;
+        background-color: rgba(15, 15, 15, 0.4);
+        border-radius: 10px;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid rgba(255, 255, 255, 0.03); /* Уменьшена яркость обводки */
+    }
+    
+    .detail-item:hover {
+        background-color: rgba(30, 30, 30, 0.5);
+        border-color: rgba(255, 255, 255, 0.08); /* Уменьшена яркость обводки при наведении */
+        transform: translateY(-3px);
+    }
+    
+    .detail-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.2rem;
+        min-width: 30px;
+        display: flex;
+        align-items: center;
+        padding-top: 2px;
+    }
+    
+    .detail-value {
+        flex: 1;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+        padding-right: 10px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    
+    /* Улучшенные стили для footer результатов */
+    .results-footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 22px;
+        margin-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95rem;
+        letter-spacing: 0.2px;
+        background-color: rgba(18, 18, 18, 0.3);
+        border-radius: 10px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .results-stat, .results-time {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .limit-message {
+        background-color: rgba(40, 40, 40, 0.5);
+        border-left: 3px solid rgba(200, 200, 200, 0.3);
+        padding: 15px 20px;
+        margin-top: 1.2rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: 0.2px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Улучшенные стили для блока "не найдено" */
+    .no-results-container {
+        background-color: rgba(22, 22, 22, 0.4);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        display: none;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .no-results-icon {
+        font-size: 3.5rem;
+        color: rgba(255, 255, 255, 0.2);
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+        animation: pulseIcon 2s infinite ease-in-out;
+    }
+    
+    @keyframes pulseIcon {
+        0% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+        100% { transform: scale(1); opacity: 0.8; }
+    }
+    
+    .no-results-title {
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 1rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .no-results-info {
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 0.8rem;
+        font-size: 1.05rem;
+        letter-spacing: 0.2px;
+    }
+    
+    .no-results-suggestion {
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 2rem;
+        letter-spacing: 0.2px;
+        font-size: 0.95rem;
+    }
+    
+    /* Улучшенные стили для блока bot-help */
+    .bot-help {
+        background: linear-gradient(145deg, rgba(25, 25, 25, 0.7) 0%, rgba(20, 20, 20, 0.8) 100%);
+        border-radius: 10px;
+        padding: 1.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        margin-top: 30px;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .bot-help:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+    
+    .bot-help-icon {
+        font-size: 2.2rem;
+        color: #0088cc;
+        opacity: 0.9;
+    }
+    
+    .bot-help-text {
+        text-align: left;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1rem;
+        flex: 1;
+        letter-spacing: 0.3px;
+        line-height: 1.6;
+    }
+    
+    .bot-help-button {
+        background-color: rgba(50, 50, 50, 0.8);
+        color: white;
+        padding: 10px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+    
+    .bot-help-button:hover {
+        background-color: rgba(60, 60, 60, 0.9);
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.25);
+    }
+    
+    .bot-help-button:active {
+        transform: translateY(1px);
+    }
+    
+    /* Улучшенные стили для загрузчика */
+    .search-loader {
+        display: none;
+        text-align: center;
+        padding: 2rem 0;
+    }
+    
+    .loader {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #FFF;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
+    /* Медиа-запросы для адаптивности */
+    @media (max-width: 768px) {
+        .desktop-menu {
+            display: none;
+        }
+        
+        #Menu-bar {
+            display: block;
+        }
+        
+        .search-form,
+        .search-results,
+        .no-results-container {
+            padding: 1.5rem;
+        }
+        
+        .search-container {
+            padding: 1rem 0;
+        }
+        
+        .result-details {
+            grid-template-columns: 1fr;
+        }
+        
+        .bot-help {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .bot-help-text {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .menu-data {
+            width: 100%;
+        }
+        
+        .logs-controls {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .logs-filter {
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+    }
+    
+    /* Стили для сообщений об ошибках */
+        .error-message {
+        display: flex;
+        background-color: rgba(40, 40, 40, 0.5);
+        border-left: 3px solid #666;
+        padding: 18px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.25s ease;
+    }
+
+    .error-message:hover {
+        background-color: rgba(45, 45, 45, 0.6);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .error-icon {
+        flex: 0 0 40px;
+        font-size: 22px;
+        color: #aaa;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 2px;
+    }
+
+    .error-text {
+        flex: 1;
+    }
+
+    .error-text h3 {
+        margin: 0 0 10px;
+        color: #ddd;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .error-text p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .error-help {
+        font-size: 14px;
+        margin-top: 12px;
+        color: rgba(255, 255, 255, 0.6);
+        padding-top: 12px;
+        border-top: 1px solid rgba(150, 150, 150, 0.2);
+    }
+    
+    .result-error-container {
+        margin-bottom: 20px;
+        background-color: rgba(40, 40, 40, 0.5);
+        border-radius: 8px;
+        padding: 20px;
+        border-left: 3px solid #777;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Стили для информационных сообщений (монохромный вариант) */
+    .info-message {
+        display: flex;
+        background-color: rgba(40, 40, 40, 0.4);
+        border-left: 4px solid #666;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .info-icon {
+        flex: 0 0 40px;
+        font-size: 22px;
+        color: #888;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .info-text {
+        flex: 1;
+    }
+    
+    .info-text p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Улучшенные стили для модального окна логов */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: rgba(0,0,0,0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .modal-content {
+        background-color: #121212;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.1);
+        width: 90%;
+        max-width: 1000px;
+        margin: 30px auto;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        max-height: calc(100vh - 60px);
+        display: flex;
+        flex-direction: column;
+        animation: modalFadeIn 0.3s ease;
+    }
+    
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: rgba(0,0,0,0.2);
+        border-radius: 12px 12px 0 0;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.3rem;
+        color: #fff;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .modal-body {
+        padding: 20px;
+        overflow-y: hidden;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .close-modal {
+        color: #777;
+        font-size: 26px;
+        font-weight: normal;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .close-modal:hover {
+        color: #fff;
+        background-color: rgba(255,255,255,0.1);
+    }
+
+    .logs-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+        gap: 12px;
+        background-color: rgba(0,0,0,0.2);
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .logs-button {
+        background-color: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #ddd;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .logs-button:hover {
+        background-color: rgba(255,255,255,0.12);
+        transform: translateY(-1px);
+    }
+
+    .logs-filter {
+        display: flex;
+        gap: 15px;
+    }
+
+    .logs-filter label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #aaa;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        padding: 3px 8px;
+        border-radius: 4px;
+    }
+    
+    .logs-filter label:hover {
+        color: #fff;
+        background-color: rgba(255,255,255,0.05);
+    }
+
+    .logs-container {
+        background-color: #0A0A0A;
+        border-radius: 8px;
+        padding: 16px;
+        overflow-y: auto;
+        flex-grow: 1;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 0.85rem;
+        height: 450px;
+        max-height: 60vh;
+        border: 1px solid rgba(255,255,255,0.05);
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    #logs-content {
+        margin: 0;
+        white-space: pre-wrap;
+        color: #bbb;
+    }
+
+    .log-entry {
+        padding: 8px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        white-space: pre-wrap;
+        word-break: break-word;
+        line-height: 1.5;
+        font-size: 0.85rem;
+        transition: background-color 0.2s ease;
+        border-radius: 4px;
+    }
+    
+    .log-entry:hover {
+        background-color: rgba(255,255,255,0.03);
+    }
+
+    .log-entry pre {
+        margin: 8px 0 0 0;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+        overflow-x: auto;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Монохромная цветовая схема для логов */
+    .log-INFO {
+        color: #bbb;
+        border-left: 3px solid #555;
+        padding-left: 12px;
+    }
+
+    .log-WARNING {
+        color: #ccc;
+        border-left: 3px solid #888;
+        padding-left: 12px;
+    }
+
+    .log-ERROR {
+        color: #eee;
+        border-left: 3px solid #aaa;
+        padding-left: 12px;
+        background-color: rgba(255,255,255,0.03);
+    }
+
+    .log-DEBUG {
+        color: #999;
+        border-left: 3px solid #444;
+        padding-left: 12px;
+        font-size: 0.8rem;
+    }
+    
+    /* Новые стили для улучшенного отображения логов */
+    .log-session-info {
+        padding: 10px;
+        margin-bottom: 15px;
+        background-color: rgba(40, 40, 40, 0.3);
+        border-radius: 5px;
+        font-size: 0.9rem;
+        color: #ddd;
+    }
+    
+    .logs-section-header {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #ccc;
+        margin: 15px 0 10px;
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .log-divider {
+        border: 0;
+        height: 1px;
+        background-image: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+        margin: 15px 0;
+    }
+
+    /* Стили для плавающей кнопки */
+    .floating-button {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 48px;
+        height: 48px;
+        background-color: rgba(25,25,25,0.7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aaa;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+
+    .floating-button:hover {
+        background-color: rgba(40,40,40,0.8);
+        transform: translateY(-3px);
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    }
+
+    /* Стили для панели отладки */
+    .search-hint-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .debug-panel {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .debug-button {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.4);
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+    }
+    
+    .debug-button:hover {
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    #api-status-indicator {
+        font-size: 10px;
+    }
+    
+    .status-online {
+        color: #aaa;
+    }
+    
+    .status-offline {
+        color: #777;
+    }
+    
+    .status-checking {
+        color: #999;
+    }
+    
+    /* Селектор сервера */
+    .server-selector {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .server-dropdown {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background-color: #1a1a1a;
+        min-width: 180px;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+        z-index: 1;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 5px;
+    }
+    
+    .server-dropdown.show {
+        display: block;
+    }
+    
+    .server-option {
+        color: #ddd;
+        padding: 10px 15px;
+        text-decoration: none;
+        display: block;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .server-option:last-child {
+        border-bottom: none;
+    }
+    
+    .server-option:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .server-option.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+    
+    #current-server {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .search-info .info-item.warning {
+        color: #ccc;
+        font-weight: bold;
+    }
+    
+    .search-limit-indicator {
+        margin-top: 10px;
+        font-size: 14px;
+        text-align: center;
+        transition: all 0.3s ease;
+        background-color: rgba(40, 40, 40, 0.4);
+        border-left: 3px solid #555;
+        padding: 10px 15px;
+        border-radius: 6px;
+    }
+    
+    .search-limit-indicator.warning {
+        color: #ddd;
+        font-weight: bold;
+        animation: pulse 1.5s infinite;
+        background-color: rgba(50, 50, 50, 0.5);
+        border-left-color: #888;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+    
+    .retry-button {
+        background-color: rgba(50, 50, 50, 0.8);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.15);
+        padding: 10px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .retry-button:hover {
+        background-color: rgba(60, 60, 60, 0.9);
+        transform: translateY(-2px);
+        border-color: rgba(255,255,255,0.25);
+    }
+    
+    .retry-button:active {
+        transform: translateY(1px);
+    }
+
+    /* Улучшенные стили для кнопки "Показать больше" */
+    .show-more-button {
+        background-color: rgba(40, 40, 40, 0.9);
+        color: #ffffff;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 500;
+    }
+
+    .show-more-button:hover {
+        background-color: rgba(60, 60, 60, 0.9);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Анимация успешной загрузки для detail-item */
+    .detail-item.load-success {
+        animation: pulse-success 1s ease-in-out;
+    }
+    
+    @keyframes pulse-success {
+        0% { background-color: transparent; }
+        30% { background-color: rgba(46, 204, 113, 0.15); }
+        100% { background-color: transparent; }
+    }
+    
+    /* Стили для detail-item и detail-value */
+    .detail-item {
+        display: flex;
+        margin-bottom: 10px;
+        padding: 12px 15px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+    
+    .detail-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .detail-label {
+        min-width: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-right: 15px;
+    }
+    
+    .detail-value {
+        flex: 1;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.9);
+        word-break: break-word;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        line-height: 1.5;
+    }
+    
+    .field-value {
+        max-width: calc(100% - 100px);
+    }
+    
+    /* Стили для API-статуса */
+    #api-status-indicator.online {
+        background-color: #4caf50;
+        box-shadow: 0 0 5px #4caf50;
+    }
+    
+    #api-status-indicator.offline {
+        background-color: #f44336;
+        box-shadow: 0 0 5px #f44336;
+    }
+    
+    /* Убираем отображение счетчика запросов и заменяем на информацию о кулдауне */
+    .search-limit-row {
+        display: none; /* Скрываем счетчик запросов */
+    }
+    
+    /* Добавляем новую информацию о кулдауне */
+    .cooldown-info {
+        margin-top: 10px;
+        font-size: 14px;
+        text-align: center;
+        background-color: rgba(40, 40, 40, 0.4);
+        border-left: 3px solid #555;
+        padding: 10px 15px;
+        border-radius: 6px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    /* Добавляем стили для блокировки кнопки во время кулдауна */
+    #search-button.cooldown {
+        background-color: #444;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    /* Стили для всплывающего уведомления о кулдауне */
+    .cooldown-toast {
+        position: fixed;
+        top: 80px;
+        left: 20px;
+        background-color: rgba(18, 18, 18, 0.6);
+        color: #fff;
+        padding: 12px 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        min-width: 260px;
+        border-left: 4px solid rgba(255, 152, 0, 0.8);
+        transform: translateX(-120%);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .cooldown-toast.active {
+        transform: translateX(0);
+    }
+    
+    .cooldown-toast-icon {
+        font-size: 1.2rem;
+        margin-right: 12px;
+        color: #ff9800;
+    }
+    
+    .cooldown-toast-content {
+        flex: 1;
+    }
+    
+    .cooldown-toast-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        font-size: 1rem;
+    }
+    
+    .cooldown-toast-message {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .cooldown-toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background-color: rgba(255, 152, 0, 0.6);
+        width: 100%;
+        transform-origin: left;
+        animation: progress-shrink 90s linear forwards;
+    }
+    
+    @keyframes progress-shrink {
+        from { transform: scaleX(1); }
+        to { transform: scaleX(0); }
+    }
+
+    /* Кнопка "Наверх" */
+    #scrollToTop {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background-color: rgba(25, 25, 25, 0.5);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        text-decoration: none;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+        z-index: 99;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #scrollToTop.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    #scrollToTop:hover {
+        background-color: rgba(35, 35, 35, 0.7);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+    }
+
+    /* Медиа-запросы для кнопки scrollToTop на мобильных устройствах */
+    @media (max-width: 768px) {
+        #scrollToTop {
+            right: 20px;
+            bottom: 20px;
+            width: 45px;
+            height: 45px;
+        }
+    }
+</style>
+</head>
+<body>
+<div id="navbar" class="navbar">
+<a href="/index.html">
+<img alt="ReFind" class="ref" loading="lazy" src="/assets/img/jasdjasdj.png"/>
+</a>
+<div class="desktop-menu">
+<a href="/index.html" class="nav-button">Главная</a>
+<a href="/news.html" class="nav-button">Новости</a>
+<a href="/api.html" class="nav-button">API</a>
+<a href="/search.html" class="nav-button active">Поиск</a>
+</div>
+<div id="Menu-bar">
+<i class="fas fa-bars size-icon"></i>
+</div>
+</div>
+<div class="menu-data">
+<a href="/index.html">Главная</a>
+<a href="/news.html">Новости</a>
+<a href="/api.html">API</a>
+<a href="/search.html">Поиск</a>
+<div id="close">
+<i class="fas fa-times"></i>
+</div>
+</div>
+
+<div class="hero-section">
+    <div class="search-container">
+        <div class="search-form">
+            <div class="search-input-group">
+                <input type="text" id="phone-input" class="search-input" placeholder="Введите номер телефона" pattern="\d*" inputmode="numeric"/>
+                <button id="search-button" class="search-button">Поиск <i class="fas fa-search"></i></button>
+            </div>
+            <div class="search-error" id="phone-error"></div>
+            <div class="search-hint-row">
+            <div class="search-hint">
+                    <i class="fas fa-info-circle"></i> Введите номер в любом формате, например: 79999999999
+                </div>
+                <div class="debug-panel">
+                    <a href="#" class="debug-button" id="check-api" title="Проверить статус API">
+                        <span id="api-status-indicator"></span> API
+                    </a>
+                </div>
+            </div>
+            <div class="search-limit-row">
+                <div class="search-limit-indicator">
+                    <i class="fas fa-search"></i> Осталось запросов: <span id="search-limit" class="search-limit-count">10</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="search-loader" class="search-loader">
+            <div class="loader"></div>
+            <p style="margin-top: 15px; color: rgba(255, 255, 255, 0.7);">Выполняется поиск...</p>
+        </div>
+        
+        <div id="search-results" class="search-results">
+            <div class="results-header">
+                <h2 class="results-title" id="results-title"></h2>
+            </div>
+            
+            <div id="results-container">
+                <!-- Результаты будут добавлены через JS -->
+            </div>
+            
+            <div class="info-message" id="telegram-info">
+                Для получения полных данных перейдите в Telegram бота:
+                <span class="bot-name">@ReFindOsintBot</span>
+                <span class="channel-info">· Канал: <span class="channel-name">@python_enter</span></span>
+            </div>
+            
+            <div class="results-footer">
+                <div class="results-stat">
+                    <i class="fas fa-database"></i> Показано: <span id="db-count">0</span> баз
+                </div>
+                <div class="results-time">
+                    <i class="fas fa-clock"></i> Время: <span id="search-time">0</span> сек.
+                </div>
+            </div>
+            
+            <div class="limit-message" id="limit-message" style="display: none;">
+                <i class="fas fa-exclamation-circle"></i> Показаны первые <span id="shown-count">0</span> из <span id="total-count">0</span> результатов. Остальные результаты доступны через бота.
+            </div>
+        </div>
+        
+        <div id="no-results" class="no-results-container">
+            <div class="no-results-icon">
+                <i class="fas fa-search-minus"></i>
+            </div>
+            <h3 class="no-results-title">По запросу не найдено данных</h3>
+            <p class="no-results-info">Номер телефона <span id="not-found-number"></span> не найден в базах данных</p>
+            <p class="no-results-suggestion">Проверьте правильность ввода или попробуйте другой номер телефона</p>
+            
+            <!-- Добавляем контейнер для отображения ошибок -->
+            <div class="result-error-container" id="result-error-container">
+                <div class="result-error-message">Ошибка доступа к серверу API</div>
+                <div class="error-help">Возможно проблема с соединением или ограничениями сервера</div>
+                <div class="search-actions">
+                    <button class="retry-button" onclick="startSearch();" style="background-color: #333; color: white; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; font-weight: 500; transition: all 0.3s ease;">
+                        <i class="fas fa-redo"></i> Повторить поиск
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bot-help">
+                <div class="bot-help-icon">
+                    <i class="fab fa-telegram"></i>
+                </div>
+                <div class="bot-help-text">
+                    Нужна помощь с поиском?<br>
+                    Напишите нашему боту: <span class="bot-name">@ReFindOsintBot</span>
+                </div>
+                <a href="#" class="bot-help-button retry-button" id="open-bot" style="background-color: #333; color: white; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; font-weight: 500; transition: all 0.3s ease;">
+                    Открыть <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Плавающая кнопка для открытия логов -->
+<div id="logs-button" class="floating-button" title="Показать логи">
+    <i class="fas fa-terminal"></i>
+</div>
+
+<!-- Скрипт для проверки состояния API -->
+<script>
+    // Базовая конфигурация ReFind
+    window.ReFind = window.ReFind || {};
+    window.ReFind.config = window.ReFind.config || {
+        api_key: '5386c7fd-f568-49f8-a36e-db8d2e705bdc',
+        remainingSearches: 10
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Стили для индикатора статуса API
+        const style = document.createElement('style');
+        style.textContent = `
+            #api-status-indicator {
+                display: inline-block;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                margin-right: 5px;
+                vertical-align: middle;
+                transition: all 0.3s ease;
+            }
+            
+            #api-status-indicator.online {
+                background-color: #4caf50;
+                box-shadow: 0 0 5px #4caf50;
+            }
+            
+            #api-status-indicator.offline {
+                background-color: #f44336;
+                box-shadow: 0 0 5px #f44336;
+            }
+            
+            #api-status-indicator.checking {
+                background-color: #ff9800;
+                box-shadow: 0 0 5px #ff9800;
+                animation: pulse 1s infinite;
+            }
+            
+            @keyframes pulse {
+                0% { opacity: 1; }
+                50% { opacity: 0.5; }
+                100% { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Находим или создаём индикатор статуса API
+        let apiStatusIndicator = document.getElementById('api-status-indicator');
+        if (!apiStatusIndicator) {
+            // Если элемент не существует, создаем его
+            apiStatusIndicator = document.createElement('span');
+            apiStatusIndicator.id = 'api-status-indicator';
+            apiStatusIndicator.className = 'checking';
+            apiStatusIndicator.title = 'Проверка соединения с API...';
+            
+            // Находим панель с индикатором
+            const checkApiButton = document.getElementById('check-api');
+            if (checkApiButton) {
+                // Вставляем индикатор перед первым дочерним элементом кнопки
+                checkApiButton.insertBefore(apiStatusIndicator, checkApiButton.firstChild);
+            }
+        } else {
+            // Если элемент существует, обновляем его стиль
+            apiStatusIndicator.className = 'checking';
+            apiStatusIndicator.innerHTML = '';
+            apiStatusIndicator.title = 'Проверка соединения с API...';
+        }
+
+        // Функция для проверки состояния API
+        function checkApiStatus() {
+            if (!apiStatusIndicator) return;
+
+            apiStatusIndicator.className = 'checking';
+            apiStatusIndicator.title = 'Проверка соединения с API...';
+            
+            // Получаем URL текущего сервера
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            const apiKey = window.ReFind && window.ReFind.config ? window.ReFind.config.api_key : '5386c7fd-f568-49f8-a36e-db8d2e705bdc';
+            const testUrl = `${baseUrl}/search?phone=79999999999&api_key=${apiKey}`;
+
+            // Используем JSONP для обхода CORS
+            if (window.ReFind && window.ReFind.api && window.ReFind.api.jsonpRequest) {
+                window.ReFind.api.jsonpRequest(testUrl, function(data) {
+                    // Проверяем ответ от сервера
+                    if (data && !data.error && data.results && Array.isArray(data.results)) {
+                        // API работает
+                        apiStatusIndicator.className = 'online';
+                        apiStatusIndicator.title = 'API доступен и работает';
+                    } else {
+                        // Ошибка API
+                        apiStatusIndicator.className = 'offline';
+                        apiStatusIndicator.title = data && data.error ? `API ошибка: ${data.error}` : 'API недоступен или вернул ошибку';
+                    }
+                });
+            } else {
+                // Если функция JSONP недоступна, используем обычный fetch
+                fetch(`${baseUrl}/api/status`, {
+                    method: 'GET',
+                    cache: 'no-cache'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json().then(data => {
+                            apiStatusIndicator.className = 'online';
+                            apiStatusIndicator.title = 'API доступен и работает';
+                        }).catch(() => {
+                            // Если не удалось разобрать JSON, но ответ пришел - считаем API частично работающим
+                            apiStatusIndicator.className = 'online';
+                            apiStatusIndicator.title = 'API доступен, но возможны проблемы с данными';
+                        });
+                    } else {
+                        apiStatusIndicator.className = 'offline';
+                        apiStatusIndicator.title = `API недоступен: ${response.status}`;
+                    }
+                })
+                .catch(() => {
+                    // Если запрос завершился с ошибкой, считаем API недоступным
+                    apiStatusIndicator.className = 'offline';
+                    apiStatusIndicator.title = 'API недоступен';
+                });
+            }
+        }
+
+        // Первичная проверка статуса API
+        checkApiStatus();
+
+        // Устанавливаем интервал проверки - каждые 10 минут
+        setInterval(checkApiStatus, 10 * 60 * 1000); // 10 минут
+
+        // Добавляем обработчик клика для ручной проверки
+        const checkApiButton = document.getElementById('check-api');
+        if (checkApiButton) {
+            checkApiButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                checkApiStatus();
+            });
+        }
+    });
+</script>
+
+<!-- Глобальная функция displayResults -->
+<script>
+// Объявляем функцию displayResults глобально
+function displayResults(data, phoneNumber) {
+    console.log('Отображение результатов для:', phoneNumber, 'Найдено записей:', data.results ? data.results.length : 0);
+    
+    // Получаем элементы DOM
+        const resultsContainer = document.getElementById('results-container');
+    const searchResults = document.getElementById('search-results');
+        const noResults = document.getElementById('no-results');
+        const resultsTitle = document.getElementById('results-title');
+    const notFoundNumber = document.getElementById('not-found-number');
+        const dbCount = document.getElementById('db-count');
+        const searchTime = document.getElementById('search-time');
+        const limitMessage = document.getElementById('limit-message');
+        const shownCount = document.getElementById('shown-count');
+        const totalCount = document.getElementById('total-count');
+        
+    // Проверяем существование элементов
+    if (!resultsContainer) {
+        console.error('Элемент results-container не найден');
+        return;
+    }
+    
+    // Очищаем все предыдущие результаты
+    resultsContainer.innerHTML = '';
+    
+    // Сбрасываем счетчики и индикаторы
+    dbCount.textContent = '0';
+    searchTime.textContent = '0.00';
+    limitMessage.style.display = 'none';
+    
+    // Форматируем номер телефона
+    const formattedPhone = phoneNumber.replace(/(\d)(\d{3})(\d{3})(\d{2})(\d{2})/, "$1 ($2) $3-$4-$5");
+    
+    // Добавляем иконку к заголовку
+    resultsTitle.innerHTML = `<i class="fas fa-search"></i> Результаты поиска для ${formattedPhone}`;
+    
+    // Сохраняем результаты последнего поиска для использования функцией showFullText
+    if (!window.ReFind) window.ReFind = {};
+    window.ReFind.lastSearchResults = data;
+    
+    if (data.error) {
+                searchResults.style.display = 'none';
+        noResults.style.display = 'block';
+        notFoundNumber.textContent = formattedPhone;
+        
+        // Очищаем существующие ошибки и кнопки
+        const existingErrorMessages = noResults.querySelectorAll('.error-message');
+        existingErrorMessages.forEach(el => el.remove());
+        
+        const existingActionDivs = noResults.querySelectorAll('.search-actions');
+        existingActionDivs.forEach(el => el.remove());
+        
+        // Создаем элемент ошибки
+        const errorElement = document.createElement('div');
+        errorElement.className = 'error-message';
+        
+        let errorMessage = data.error;
+        let errorHelp = '';
+        
+        if (typeof errorMessage === 'object') {
+            try {
+                errorMessage = JSON.stringify(errorMessage);
+            } catch (e) {
+                errorMessage = 'Ошибка в формате неизвестного типа';
+            }
+        }
+        
+        errorElement.innerHTML = `
+            <div class="error-icon"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="error-text">
+                <h3>Ошибка при поиске</h3>
+                <p>${errorMessage}</p>
+                ${errorHelp ? `<div class="error-help">${errorHelp}</div>` : ''}
+            </div>
+        `;
+        
+        noResults.appendChild(errorElement);
+        
+        // Добавляем кнопку повтора
+        const retryButton = document.createElement('button');
+        retryButton.className = 'bot-help-button retry-button';
+        retryButton.innerHTML = '<i class="fas fa-redo"></i> Повторить поиск';
+        retryButton.style.marginTop = '20px';
+        retryButton.onclick = function() {
+            if (typeof startSearch === 'function') {
+                startSearch();
+            } else {
+                console.error('Функция startSearch не определена');
+            }
+        };
+        
+        const actionDiv = document.createElement('div');
+        actionDiv.className = 'search-actions';
+        actionDiv.style.marginTop = '20px';
+        actionDiv.appendChild(retryButton);
+        noResults.appendChild(actionDiv);
+        
+        return;
+    }
+    
+    if (!data.results || data.results.length === 0) {
+        searchResults.style.display = 'none';
+        noResults.style.display = 'block';
+        notFoundNumber.textContent = formattedPhone;
+        return;
+    }
+    
+    // Фильтруем результаты, убирая записи с "Неизвестная утечка"
+    const filteredResults = data.results.filter(result => {
+        // Пропускаем результаты с "Неизвестная утечка" в поле explain
+        if (result.explain && result.explain === "Неизвестная утечка") {
+            return false;
+        }
+        return true;
+    });
+    
+    // Проверяем, остались ли результаты после фильтрации
+    if (filteredResults.length === 0) {
+        searchResults.style.display = 'none';
+        noResults.style.display = 'block';
+        notFoundNumber.textContent = formattedPhone;
+        return;
+    }
+    
+    // Показываем результаты с плавной анимацией
+    searchResults.style.opacity = '0';
+    searchResults.style.display = 'block';
+    noResults.style.display = 'none';
+    
+    // Запускаем анимацию появления
+    setTimeout(() => {
+        searchResults.style.opacity = '1';
+        searchResults.style.transition = 'opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+    }, 10);
+    
+    // Определяем общее количество найденных баз данных
+    const totalFound = filteredResults.length;
+    
+    // Стилизуем карточки результатов
+    const resultCards = document.createElement('div');
+    resultCards.className = 'result-cards';
+    resultCards.style.marginTop = '20px';
+    
+    // Отображаем ВСЕ результаты без ограничений
+    filteredResults.forEach((result, index) => {
+        const resultCard = createResultCard(result, index);
+        if (resultCard) {  // Проверяем, что карточка существует
+            resultCards.appendChild(resultCard);
+        }
+    });
+    
+    resultsContainer.appendChild(resultCards);
+    
+    // Обновляем счетчики внизу страницы
+    dbCount.textContent = filteredResults.length;
+    searchTime.textContent = (data.searchTime || data.execution_time || 0).toFixed(2);
+    
+    // Проверяем лимит результатов
+    if (data.limited || (totalFound > filteredResults.length)) {
+        limitMessage.style.display = 'flex';
+        shownCount.textContent = filteredResults.length;
+        totalCount.textContent = totalFound;
+    } else {
+        limitMessage.style.display = 'none';
+    }
+    
+    // Плавно скроллим к результатам
+    setTimeout(() => {
+        searchResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+}
+
+// Добавляем функцию createResultCard, которой не хватало
+        function createResultCard(result, index) {
+    if (!result) return null;
+                
+    const MAX_DETAIL_LENGTH = 150;
+                const resultElement = document.createElement('div');
+                resultElement.className = 'result-item';
+    resultElement.setAttribute('data-index', index);
+    
+    // Устанавливаем задержку анимации для каждой карточки
+    // Ограничиваем до 6, чтобы не было слишком долгой задержки для больших списков
+    const animationIndex = Math.min(index, 5);
+    resultElement.style.animationDelay = `${0.05 * animationIndex}s`;
+    
+    // Формируем заголовок
+    const database = result.database || 'Неизвестная база';
+    const description = result.explain || result.description || 'Содержит информацию по этому номеру';
+    
+    // Выбираем иконку для базы данных на основе названия
+    let databaseIcon = 'fa-database';
+    const dbNameLower = database.toLowerCase();
+    
+    if (dbNameLower.includes('phone') || dbNameLower.includes('номер') || 
+        dbNameLower.includes('теле') || dbNameLower.includes('call')) {
+        databaseIcon = 'fa-phone';
+    } else if (dbNameLower.includes('vk') || dbNameLower.includes('вконтакт') || 
+               dbNameLower.includes('соц') || dbNameLower.includes('профил')) {
+        databaseIcon = 'fa-user';
+    } else if (dbNameLower.includes('telegram') || dbNameLower.includes('телеграм')) {
+        databaseIcon = 'fa-paper-plane';
+    } else if (dbNameLower.includes('email') || dbNameLower.includes('mail') || 
+               dbNameLower.includes('почт')) {
+        databaseIcon = 'fa-envelope';
+    }
+    
+    const headerHTML = `
+                    <div class="result-header">
+            <div class="result-database">
+                <i class="fas ${databaseIcon}"></i> ${database}
+            </div>
+                        <div class="result-description">${description}</div>
+                    </div>
+                `;
+                
+    // Формируем детали
+                let detailsHTML = '<div class="result-details">';
+                
+    // Обрабатываем вложенные данные из поля data
+                if (result.data && typeof result.data === 'object') {
+                    // Исключаем системные поля и дубликаты
+        const skipFields = ['id', '_id', 'database', 'source', 'icon', 'description', 'explain', '_masked'];
+                    const addedFields = [];
+                    
+                    Object.entries(result.data).forEach(([key, value]) => {
+            // Пропускаем служебные поля, пустые значения и дубликаты
+            if (skipFields.includes(key) || key.endsWith('_full') || key.endsWith('_truncated') || 
+                !value || value === "" || addedFields.includes(key.toLowerCase())) {
+                return;
+            }
+                        
+                        addedFields.push(key.toLowerCase());
+                        const icon = getIconForDataType(key);
+                        
+            // Применяем маскировку к данным
+            const maskedValue = maskSensitiveData(value, key);
+        
+            const origValue = String(maskedValue);
+            const truncated = result.data[key + '_truncated'] === true;
+            const displayValue = truncated ? origValue : limitTextLength(origValue, MAX_DETAIL_LENGTH);
+        
+            // Добавляем кнопку "Показать больше" только если текст обрезан или есть флаг truncated
+            const showMoreButton = truncated || origValue.length > MAX_DETAIL_LENGTH ? 
+                `<button class="show-more-button" onclick="ReFind.showFullText(this, '${key}', ${index})">
+                    <i class="fas fa-plus-circle"></i> Показать
+                </button>` : '';
+                    
+                        detailsHTML += `
+                <div class="detail-item" data-field="${key}">
+                                <div class="detail-label">${icon}</div>
+                    <div class="detail-value">
+                        <span class="field-value">${displayValue}</span>
+                        ${showMoreButton}
+                    </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Обрабатываем основные поля объекта напрямую
+                    const fieldChecks = [
+                        { field: 'phone', icon: '📞' },
+                        { field: 'email', icon: '📧' },
+                        { field: 'name', icon: '👤' },
+                        { field: 'surname', icon: '👤' },
+                        { field: 'address', icon: '🏠' },
+                        { field: 'username', icon: '🗣️' },
+                        { field: 'passport', icon: '🪪' },
+                        { field: 'city', icon: '🏙️' },
+                        { field: 'birthday', icon: '🎂' },
+                        { field: 'job', icon: '💼' },
+                        { field: 'company', icon: '🏢' },
+                        { field: 'tags', icon: '🏷️' },
+                    ];
+                    
+                const addedFields = [];
+                    for (const check of fieldChecks) {
+                    if (result[check.field] && !addedFields.includes(check.field)) {
+                            let value = result[check.field];
+                            
+                            if (Array.isArray(value)) {
+                                value = value.join(', ');
+                            }
+        
+            // Применяем маскировку к данным
+            const maskedValue = maskSensitiveData(value, check.field);
+        
+            const origValue = String(maskedValue);
+            const truncated = result[check.field + '_truncated'] === true;
+            const displayValue = truncated ? origValue : limitTextLength(origValue, MAX_DETAIL_LENGTH);
+        
+            // Добавляем кнопку "Показать больше" только если текст обрезан или есть флаг truncated
+            const showMoreButton = truncated || origValue.length > MAX_DETAIL_LENGTH ? 
+                `<button class="show-more-button" onclick="ReFind.showFullText(this, '${check.field}', ${index})">
+                    <i class="fas fa-plus-circle"></i> Показать
+                </button>` : '';
+                            
+                        addedFields.push(check.field);
+                            detailsHTML += `
+                <div class="detail-item" data-field="${check.field}">
+                                    <div class="detail-label">${check.icon}</div>
+                    <div class="detail-value">
+                        <span class="field-value">${displayValue}</span>
+                        ${showMoreButton}
+                    </div>
+                                </div>
+                            `;
+                    }
+                }
+                
+                detailsHTML += '</div>';
+                
+                resultElement.innerHTML = headerHTML + detailsHTML;
+                
+                resultElement.setAttribute('data-secure', 'true');
+                resultElement.setAttribute('data-masked', 'true');
+    
+                if (result.secure_token) {
+                    resultElement.setAttribute('data-token', result.secure_token);
+                }
+                
+            return resultElement;
+        }
+        
+// Функция для ограничения длины текста
+function limitTextLength(text, maxLength) {
+    if (!text || typeof text !== 'string') return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+}
+
+// Функция для маскировки чувствительных данных
+function maskSensitiveData(value, fieldType) {
+    if (!value || typeof value !== 'string') return value;
+    
+    // Преобразуем в строку, если это не строка
+    const strValue = String(value);
+    
+    // Определяем тип поля по названию
+    const fieldLower = fieldType.toLowerCase();
+    
+    // Не маскируем некоторые типы данных
+    if (fieldLower.includes('city') || fieldLower.includes('город') || 
+        fieldLower.includes('company') || fieldLower.includes('tags') || 
+        fieldLower.includes('тег') || fieldLower.includes('tag') ||
+        fieldLower.includes('service') || fieldLower.includes('сервис')) {
+        return strValue;
+    }
+    
+    // Маскировка телефонов (скрываем цифры в середине)
+    if (fieldLower.includes('phone') || fieldLower === 't' || fieldLower === 'number' || 
+        fieldLower.includes('телефон') || fieldLower.includes('номер')) {
+        // Используем регулярное выражение для извлечения телефонного номера
+        const phoneMatch = strValue.match(/(\d+)/g);
+        if (phoneMatch && phoneMatch[0].length >= 10) {
+            const phone = phoneMatch[0];
+            // Оставляем видимыми первые 4 и последние 2 цифры
+            const prefix = phone.substring(0, 4);
+            const suffix = phone.substring(phone.length - 2);
+            const maskedPart = '*'.repeat(phone.length - 6);
+            return strValue.replace(phone, prefix + maskedPart + suffix);
+        }
+    }
+    
+    // Маскировка email (показываем половину локальной части)
+    if (fieldLower.includes('mail') || fieldLower === 'e' || fieldLower.includes('почта')) {
+        const parts = strValue.split('@');
+        if (parts.length === 2) {
+            const localPart = parts[0];
+            const domain = parts[1];
+            
+            // Показываем примерно половину локальной части
+            const visibleChars = Math.max(Math.ceil(localPart.length / 2), 2);
+            const maskedLocal = localPart.substring(0, visibleChars) + '*'.repeat(Math.max(1, localPart.length - visibleChars));
+            
+            return `${maskedLocal}@${domain}`;
+        }
+    }
+    
+    // Маскировка имен и фамилий (менее агрессивная)
+    if (fieldLower.includes('name') || fieldLower.includes('имя') || 
+        fieldLower === 'fio' || fieldLower === 'fullname' || fieldLower === 'ФИО' ||
+        fieldLower.includes('surname') || fieldLower.includes('lastname') || 
+        fieldLower.includes('фамилия') || fieldLower.includes('отчество')) {
+        
+        // Обработка составных имен (ФИО)
+        if (strValue.includes(' ')) {
+            return strValue.split(' ').map(part => {
+                if (part.length <= 2) return part;
+                // Показываем первые 2 буквы
+                return part.substring(0, 2) + '*'.repeat(Math.max(1, part.length - 2));
+            }).join(' ');
+        } 
+        // Обработка одиночных слов
+        else {
+            if (strValue.length <= 2) return strValue;
+            // Показываем первые 2 буквы
+            return strValue.substring(0, 2) + '*'.repeat(Math.max(1, strValue.length - 2));
+        }
+    }
+    
+    // Маскировка паспортных данных (показываем серию, скрываем номер)
+    if (fieldLower.includes('passport') || fieldLower.includes('паспорт')) {
+        // Если это выглядит как паспортные данные в формате XXXX YYYYYY
+        const passportMatch = strValue.match(/^(\d{4})\s*(\d{6})$/);
+        if (passportMatch) {
+            return `${passportMatch[1]} ***`;
+        }
+        // Для других форматов оставляем первую треть видимой
+        const visiblePart = Math.ceil(strValue.length / 3);
+        return strValue.substring(0, visiblePart) + '*'.repeat(Math.max(1, strValue.length - visiblePart));
+    }
+    
+    // Маскировка адресов (более мягкая)
+    if (fieldLower.includes('address') || fieldLower.includes('адрес')) {
+        // Показываем только город или часть адреса
+        const parts = strValue.split(',');
+        if (parts.length > 1) {
+            // Оставляем первые две части адреса (обычно город и улица)
+            const visibleParts = parts.slice(0, Math.min(2, parts.length));
+            const hiddenParts = parts.length > 2 ? ", ***" : "";
+            return visibleParts.join(',') + hiddenParts;
+                } else {
+            // Если адрес не разбит запятыми, показываем больше информации
+            const words = strValue.split(' ');
+            const visibleWords = Math.min(3, words.length);
+            const hiddenPart = words.length > visibleWords ? " ***" : "";
+            return words.slice(0, visibleWords).join(' ') + hiddenPart;
+        }
+    }
+    
+    // Для остальных данных делаем более мягкую маскировку
+    if (strValue.length > 8) {
+        return strValue.substring(0, Math.ceil(strValue.length * 0.7)) + '*'.repeat(3);
+    }
+    
+    return strValue;
+}
+
+// Получение иконки для типа данных
+function getIconForDataType(fieldName) {
+    const fieldNameLower = fieldName.toLowerCase();
+    
+    if (fieldNameLower.includes('phone') || fieldNameLower === 't' || fieldNameLower === 'number') return '📞';
+    if (fieldNameLower.includes('mail') || fieldNameLower === 'e' || fieldNameLower === 'email' || fieldNameLower.includes('почта')) return '📧';
+    if (fieldNameLower.includes('name') || fieldNameLower.includes('имя') || fieldNameLower === 'fio' || fieldNameLower === 'fullname' || fieldNameLower === 'ФИО') return '👤';
+    if (fieldNameLower.includes('surname') || fieldNameLower.includes('lastname') || fieldNameLower.includes('фамилия')) return '👤';
+    if (fieldNameLower.includes('address') || fieldNameLower.includes('адрес')) return '🏠';
+    if (fieldNameLower.includes('city') || fieldNameLower.includes('город')) return '🏙️';
+    if (fieldNameLower.includes('birth') || fieldNameLower.includes('bday') || fieldNameLower.includes('birthday')) return '🎂';
+    if (fieldNameLower.includes('job') || fieldNameLower.includes('work') || fieldNameLower.includes('company')) return '💼';
+    if (fieldNameLower.includes('passport') || fieldNameLower.includes('паспорт')) return '🪪';
+    if (fieldNameLower.includes('tags') || fieldNameLower.includes('tag') || fieldNameLower.includes('тег')) return '🏷️';
+    if (fieldNameLower.includes('username') || fieldNameLower.includes('nick') || fieldNameLower.includes('login')) return '🗣️';
+    if (fieldNameLower.includes('comment') || fieldNameLower.includes('note')) return '📝';
+    
+    // Для остальных полей используем общую иконку
+    return '📄';
+}
+</script>
+
+<script>
+// Базовая система логирования ReFind
+(function() {
+    // Инициализируем объект ReFind, если он не существует
+    window.ReFind = window.ReFind || {};
+    window.ReFind.api = window.ReFind.api || {};
+    
+    // JSONP запрос для обхода CORS ограничений
+    window.ReFind.api.jsonpRequest = function(url, callback) {
+        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+        window[callbackName] = function(data) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            callback(data);
+        };
+
+        const script = document.createElement('script');
+        script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
+        document.body.appendChild(script);
+        
+        // Добавляем обработку ошибок
+        script.onerror = function() {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            callback({ error: 'Ошибка при выполнении JSONP запроса' });
+        };
+    };
+    
+    // Функция для отображения полного текста (с маскировкой)
+    window.ReFind.showFullText = function(button, fieldName, resultIndex) {
+        try {
+            console.log(`Запрошен полный текст для поля ${fieldName} в результате ${resultIndex}`);
+            
+            // Проверяем наличие последних результатов поиска
+            if (!window.ReFind || !window.ReFind.lastSearchResults || !window.ReFind.lastSearchResults.results) {
+                console.error('Нет данных для отображения полного текста');
+                return;
+            }
+            
+            // Получаем результат по индексу
+            const result = window.ReFind.lastSearchResults.results[resultIndex];
+            if (!result) {
+                console.error(`Результат с индексом ${resultIndex} не найден`);
+                return;
+            }
+            
+            // Находим значение поля в результате
+            let fieldValue = result[fieldName];
+            
+            // Если значение не найдено напрямую, пробуем искать в других полях
+            if (fieldValue === undefined) {
+                // Перебираем все свойства объекта и ищем совпадение по имени без учета регистра
+                for (const key in result) {
+                    if (key.toLowerCase() === fieldName.toLowerCase() || 
+                        key.toLowerCase().includes(fieldName.toLowerCase())) {
+                        fieldValue = result[key];
+                        console.debug(`Найдено значение в поле ${key}`);
+                        break;
+                    }
+                }
+                
+                // Если все еще не нашли, ищем в _source (формат Elasticsearch)
+                if (fieldValue === undefined && result._source) {
+                    fieldValue = result._source[fieldName];
+                    if (fieldValue !== undefined) {
+                        console.debug(`Найдено значение в _source.${fieldName}`);
+                    }
+                }
+                
+                // Ищем в других возможных местах хранения данных
+                if (fieldValue === undefined) {
+                    const possibleContainers = ['data', 'source', '_source', 'fields', 'values', 'properties'];
+                    for (const container of possibleContainers) {
+                        if (result[container] && typeof result[container] === 'object') {
+                            if (result[container][fieldName] !== undefined) {
+                                fieldValue = result[container][fieldName];
+                                console.debug(`Найдено значение в ${container}.${fieldName}`);
+                                break;
+                            }
+                            
+                            // Пробуем искать по ключу без учета регистра
+                            for (const key in result[container]) {
+                                if (key.toLowerCase() === fieldName.toLowerCase()) {
+                                    fieldValue = result[container][key];
+                                    console.debug(`Найдено значение в ${container}.${key} (без учета регистра)`);
+                                    break;
+                                }
+                            }
+                            
+                            if (fieldValue !== undefined) break;
+                        }
+                    }
+                }
+            }
+            
+            // Если значение все еще не найдено, пробуем искать в data
+            if (fieldValue === undefined && result.data) {
+                fieldValue = result.data[fieldName];
+            }
+            
+            // Если значение все еще не найдено, возвращаем ошибку
+            if (fieldValue === undefined) {
+                console.error(`Поле ${fieldName} не найдено в результате`);
+                
+                // Подготовим сообщение для отладки
+                const availableFields = [];
+                for (const key in result) {
+                    if (typeof result[key] !== 'function') {
+                        availableFields.push(key);
+                    }
+                }
+                
+                console.debug('Доступные поля в результате:', availableFields.join(', '));
+                
+                // В любом случае, скроем кнопку, чтобы не путать пользователя
+                button.style.display = 'none';
+                return;
+            }
+            
+            // Обрабатываем различные типы данных
+            if (Array.isArray(fieldValue)) {
+                fieldValue = fieldValue.join(', ');
+                console.debug('Массив значений преобразован в строку');
+            } else if (typeof fieldValue !== 'string') {
+                fieldValue = String(fieldValue);
+                console.debug('Значение преобразовано в строку');
+            }
+            
+            // Применяем маскировку к данным
+            const maskedValue = maskSensitiveData(fieldValue, fieldName);
+            
+            // Находим контейнер и элемент для обновления
+            const detailItem = button.closest('.detail-item');
+            if (!detailItem) {
+                console.error('Не найден контейнер для значения (detail-item)');
+                return;
+            }
+            
+            // Находим элемент со значением
+            const valueElement = detailItem.querySelector('.field-value');
+            if (!valueElement) {
+                console.error('Элемент значения не найден (field-value)');
+                return;
+            }
+            
+            // Добавляем анимацию для плавного обновления
+            detailItem.classList.add('load-success');
+            
+            // Обновляем значение и удаляем кнопку
+            valueElement.textContent = maskedValue;
+            
+            // Удаляем кнопку
+            button.style.opacity = '0';
+            setTimeout(() => {
+                button.remove();
+            }, 300);
+            
+            // Удаляем класс анимации через 1 секунду
+            setTimeout(() => {
+                detailItem.classList.remove('load-success');
+            }, 1000);
+            
+            console.info(`Успешно отображен полный текст для поля ${fieldName}`);
+        } catch (error) {
+            console.error(`Ошибка при отображении полного текста: ${error.message}`, error);
+        }
+    };
+    
+    // Массив логов
+    const logs = [];
+    
+    // Максимальное количество логов в памяти
+    const MAX_LOGS = 100;
+    
+    // Текущая сессия
+    const sessionId = `session_${Date.now()}`;
+    
+    // Уровни логирования
+    const LOG_LEVELS = {
+        DEBUG: 0,
+        INFO: 1,
+        WARNING: 2,
+        ERROR: 3
+    };
+    
+    // Функция логирования
+    window.ReFind.api.logger = {
+        debug: function(message, data) {
+            addLogEntry('DEBUG', message, data);
+        },
+        info: function(message, data) {
+            addLogEntry('INFO', message, data);
+        },
+        warning: function(message, data) {
+            addLogEntry('WARNING', message, data);
+        },
+        error: function(message, data) {
+            addLogEntry('ERROR', message, data);
+        }
+    };
+    
+    // Добавление записи лога
+    function addLogEntry(level, message, data) {
+        const timestamp = new Date();
+        const logEntry = {
+            level: level,
+            message: message,
+            data: data,
+            timestamp: timestamp,
+            sessionId: sessionId
+        };
+        
+        // Добавляем запись в начало массива
+        logs.unshift(logEntry);
+        
+        // Ограничиваем размер массива
+        if (logs.length > MAX_LOGS) {
+            logs.pop();
+        }
+        
+        // Выводим в консоль для отладки
+        console[level.toLowerCase()](`[${level}] ${message}`, data || '');
+    }
+    
+    // Загрузка логов в модальное окно
+    window.ReFind.api.loadLogs = function() {
+        const logsContent = document.getElementById('logs-content');
+        if (!logsContent) return;
+        
+        // Получаем активные фильтры
+        const activeFilters = Array.from(document.querySelectorAll('.log-level-filter:checked'))
+            .map(filter => filter.value);
+        
+        // Фильтруем логи
+        const filteredLogs = logs.filter(log => activeFilters.includes(log.level));
+        
+        // Очищаем контейнер
+        logsContent.innerHTML = '';
+        
+        // Если нет логов, показываем сообщение
+        if (filteredLogs.length === 0) {
+            logsContent.innerHTML = '<div class="log-entry log-INFO">Логи отсутствуют</div>';
+            return;
+        }
+        
+        // Группируем логи по сессиям
+        const sessionLogs = {};
+        filteredLogs.forEach(log => {
+            if (!sessionLogs[log.sessionId]) {
+                sessionLogs[log.sessionId] = [];
+            }
+            sessionLogs[log.sessionId].push(log);
+        });
+        
+        // Отображаем логи по сессиям
+        Object.keys(sessionLogs).forEach((sessionId, index) => {
+            const sessionHeader = document.createElement('div');
+            sessionHeader.className = 'logs-section-header';
+            sessionHeader.textContent = `Сессия ${index + 1}`;
+            logsContent.appendChild(sessionHeader);
+            
+            sessionLogs[sessionId].forEach(log => {
+                // Форматируем время
+                const time = log.timestamp.toLocaleTimeString();
+                
+                // Создаем элемент лога
+                const logElement = document.createElement('div');
+                logElement.className = `log-entry log-${log.level}`;
+                
+                // Формируем HTML для лога
+                let logHTML = `<strong>[${time}]</strong> ${log.message}`;
+                
+                // Если есть дополнительные данные, добавляем их
+                if (log.data) {
+                    let dataStr = '';
+                    try {
+                        dataStr = typeof log.data === 'object' ? 
+                            JSON.stringify(log.data, null, 2) : String(log.data);
+                    } catch (e) {
+                        dataStr = '[Невозможно отобразить данные]';
+                    }
+                    
+                    if (dataStr) {
+                        logHTML += `<pre>${dataStr}</pre>`;
+                    }
+                }
+                
+                logElement.innerHTML = logHTML;
+                logsContent.appendChild(logElement);
+            });
+            
+            // Добавляем разделитель между сессиями, кроме последней
+            if (index < Object.keys(sessionLogs).length - 1) {
+                const divider = document.createElement('hr');
+                divider.className = 'log-divider';
+                logsContent.appendChild(divider);
+            }
+        });
+    };
+    
+    // Функция фильтрации логов
+    window.ReFind.api.filterLogs = function() {
+        window.ReFind.api.loadLogs();
+    };
+    
+    // Инициализация: добавляем первый лог
+    window.ReFind.api.logger.info('Система логирования инициализирована');
+})();
+</script>
+
+<!-- Код для обработки результатов поиска -->
+<script>
+    // Инициализация переменных и функций для поиска
+    document.addEventListener('DOMContentLoaded', function() {
+        // Элементы интерфейса
+        const phoneInput = document.getElementById('phone-input');
+        const searchButton = document.getElementById('search-button');
+        const phoneError = document.getElementById('phone-error');
+        const searchLoader = document.getElementById('search-loader');
+        const searchResults = document.getElementById('search-results');
+        const noResults = document.getElementById('no-results');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsTitle = document.getElementById('results-title');
+        const notFoundNumber = document.getElementById('not-found-number');
+        const limitMessage = document.getElementById('limit-message');
+        const shownCount = document.getElementById('shown-count');
+        const totalCount = document.getElementById('total-count');
+        const searchLimitElement = document.getElementById('search-limit');
+        
+        // Инициализация счетчика запросов
+        if (searchLimitElement) {
+            if (window.ReFind && window.ReFind.config && typeof window.ReFind.config.remainingSearches === 'number') {
+                searchLimitElement.textContent = window.ReFind.config.remainingSearches;
+                } else {
+                searchLimitElement.textContent = '10';
+            }
+        }
+        
+        // Состояние загрузки
+        let loading = false;
+        
+        // Функция для обновления состояния загрузки
+        function updateLoadingState() {
+            if (loading) {
+                searchLoader.style.display = 'block';
+                searchResults.style.display = 'none';
+                noResults.style.display = 'none';
+                } else {
+                searchLoader.style.display = 'none';
+            }
+        }
+        
+        // Функция для проверки формата номера телефона
+        function validatePhoneNumber(phone) {
+            // Удаляем все нецифровые символы
+            const cleanPhone = phone.replace(/\D/g, '');
+            
+            // Проверяем, что номер состоит из 11 цифр и начинается с 7 или 8
+            return /^[78]\d{10}$/.test(cleanPhone);
+        }
+        
+        // Функция для форматирования номера телефона
+        function formatPhoneNumber(phone) {
+            // Удаляем все нецифровые символы
+            const cleaned = phone.replace(/\D/g, '');
+            
+            // Форматируем номер как 7 (123) 456-78-90
+            if (cleaned.length === 11) {
+                return `${cleaned[0]} (${cleaned.substring(1, 4)}) ${cleaned.substring(4, 7)}-${cleaned.substring(7, 9)}-${cleaned.substring(9, 11)}`;
+            }
+            
+            return phone;
+        }
+        
+        // Функция debounce для предотвращения множественных запросов
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+        
+        async function performSearch(phone) {
+            loading = true;
+            updateLoadingState();
+            
+            try {
+                const logger = window.ReFind && window.ReFind.api && window.ReFind.api.logger ? 
+                    window.ReFind.api.logger : {
+                        info: (msg) => console.info(msg),
+                        error: (msg) => console.error(msg),
+                        debug: (msg) => console.debug(msg)
+                    };
+                    
+                logger.info(`Начинаем поиск по номеру: ${phone.substring(0, 5)}***`);
+                const startTime = performance.now();
+                    
+                // Нормализуем номер телефона
+                phone = phone.replace(/[^\d]/g, '');
+                if (phone.startsWith('8')) {
+                    phone = '7' + phone.substring(1);
+                }
+                
+                // Получаем API ключ из конфигурации
+                const apiKey = window.ReFind && window.ReFind.config ? window.ReFind.config.api_key : '5386c7fd-f568-49f8-a36e-db8d2e705bdc';
+                        
+                // Всегда используем реальный API
+                logger.info(`Выполняем JSONP запрос к серверу ReFind`);
+                
+                // Создаем промис для отслеживания выполнения запроса
+                return new Promise((resolve, reject) => {
+                    // Формируем URL для JSONP запроса
+                    const jsonpUrl = `${window.location.protocol}//${window.location.host}/search?phone=${phone}&api_key=${apiKey}`;
+                    
+                    // Используем JSONP запрос
+                    window.ReFind.api.jsonpRequest(jsonpUrl, function(data) {
+                        const endTime = performance.now();
+                        const requestDuration = ((endTime - startTime) / 1000).toFixed(2);
+                        
+                        // Уменьшаем счетчик оставшихся запросов
+                        if (window.ReFind && window.ReFind.config) {
+                            if (typeof window.ReFind.config.remainingSearches === 'number') {
+                                window.ReFind.config.remainingSearches = Math.max(0, window.ReFind.config.remainingSearches - 1);
+                                
+                                // Обновляем отображение счетчика
+                                const searchLimitElement = document.getElementById('search-limit');
+                                if (searchLimitElement) {
+                                    searchLimitElement.textContent = window.ReFind.config.remainingSearches;
+                                }
+                            }
+                        }
+                        
+                        // Проверяем, что data - это объект
+                        if (typeof data !== 'object' || data === null) {
+                            logger.error(`Ошибка формата данных: ответ не является объектом`);
+                            loading = false;
+                            updateLoadingState();
+                            resolve({ 
+                                error: `Некорректный формат данных в ответе`,
+                                results: []
+                            });
+                return;
+            }
+            
+                        // Проверяем наличие ошибки в ответе
+                        if (data && data.error) {
+                            logger.error(`Ошибка при поиске: ${data.error}`);
+                            loading = false;
+                            updateLoadingState();
+                            resolve({ 
+                                error: data.error,
+                                errorCode: data.errorCode || 'API_ERROR',
+                                results: []
+                            });
+                return;
+            }
+            
+                        // Если получен пустой результат или явно указано "not found"
+                        if ((data && data.detail && typeof data.detail === 'string' && data.detail.includes("not found")) || 
+                            (data && Array.isArray(data.results) && data.results.length === 0)) {
+                            
+                            logger.info(`Номер не найден в базах данных`);
+                            loading = false;
+                            updateLoadingState();
+                            
+                            resolve({ 
+                                error: 'Номер не найден в базах данных',
+                                errorCode: 'NOT_FOUND',
+                                results: [],
+                                totalFound: 0,
+                                searchTime: requestDuration
+                            });
+                            return;
+                        }
+                        
+                        logger.info(`Поиск успешно завершен: найдено ${data.results ? data.results.length : 0} результатов за ${requestDuration}с`);
+                        
+                        // Проверяем, что результаты - это массив
+                        if (data.results && !Array.isArray(data.results)) {
+                            data.results = [];
+                            logger.warning('Результаты поиска не являются массивом');
+                        }
+                        
+                        // Отслеживаем статистику поиска
+                        if (window.ReFind && window.ReFind.trackSearch) {
+                            window.ReFind.trackSearch({
+                                type: 'phone',
+                                count: data.results ? data.results.length : 0,
+                                searchTime: requestDuration,
+                                error: null
+                            });
+                        }
+                        
+                        loading = false;
+                        updateLoadingState();
+                        
+                        // Нормализуем результаты
+                        const result = {
+                            results: data.results || [],
+                            totalFound: data.results ? data.results.length : 0,
+                            originalCount: data.count || data.results?.length || 0,
+                            searchTime: data.execution_time || requestDuration,
+                            request_id: data.request_id || `req_${Date.now()}_${Math.floor(Math.random() * 10000)}`
+                        };
+                        
+                        resolve(result);
+                    });
+                });
+            } catch (error) {
+                // Используем систему логирования, если она доступна
+                if (window.ReFind && window.ReFind.api && window.ReFind.api.logger) {
+                    window.ReFind.api.logger.error(`Необработанная ошибка при поиске: ${error.message}`, {
+                        error: error.toString(),
+                        stack: error.stack
+                    });
+            } else {
+                    console.error("Ошибка при выполнении поиска:", error);
+                }
+                
+                loading = false;
+                updateLoadingState();
+                
+                return { 
+                    error: error.message || "Ошибка при выполнении поиска", 
+                    results: [] 
+                };
+            }
+        }
+        
+        window.startSearch = function() {
+                const phone = phoneInput.value.trim();
+                
+                if (!validatePhoneNumber(phone)) {
+                phoneError.textContent = "Номер телефона должен содержать 11 цифр и начинаться с 7 или 8";
+                    phoneError.style.display = 'block';
+                    return;
+                }
+                
+                phoneError.style.display = 'none';
+
+            // Очищаем предыдущие результаты
+            if (window.ReFind) {
+                window.ReFind.lastSearchResults = null;
+            }
+            
+            // Скрываем предыдущие результаты и отображаем индикатор загрузки
+            searchResults.style.display = 'none';
+            noResults.style.display = 'none';
+            resultsContainer.innerHTML = '';
+                
+            performSearch(phone)
+                .then(data => {
+                    displayResults(data, phone);
+                    
+                    if (data && data.results && data.results.length > 0) {
+                        searchResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        noResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                })
+                .catch(error => {
+                    console.error('Необработанная ошибка при поиске:', error);
+                    
+                    searchResults.style.display = 'none';
+                    noResults.style.display = 'block';
+                    notFoundNumber.textContent = formatPhoneNumber(phone);
+                    
+                    // Очищаем существующие ошибки и кнопки перед добавлением новых
+                    const existingErrorMessages = noResults.querySelectorAll('.error-message');
+                    existingErrorMessages.forEach(el => el.remove());
+                    
+                    const existingActionDivs = noResults.querySelectorAll('.search-actions');
+                    existingActionDivs.forEach(el => el.remove());
+                    
+                    const errorElem = document.createElement('div');
+                    errorElem.className = 'error-message';
+                    
+                    const errorMsg = error.message && typeof error.message === 'string' 
+                        ? error.message
+                        : 'Неизвестная ошибка при поиске';
+                    
+                    errorElem.innerHTML = `
+                        <div class="error-icon"><i class="fas fa-exclamation-circle"></i></div>
+                        <div class="error-text">
+                            <h3>Произошла ошибка</h3>
+                            <p>${errorMsg}</p>
+                        </div>
+                    `;
+                    
+                    while (noResults.children.length > 4) {
+                        noResults.removeChild(noResults.lastChild);
+                    }
+                    
+                    noResults.appendChild(errorElem);
+                    
+                    // Добавляем кнопку повторного поиска
+                    const retryButton = document.createElement('button');
+                    retryButton.className = 'bot-help-button retry-button';
+                    retryButton.innerHTML = '<i class="fas fa-redo"></i> Повторить поиск';
+                    retryButton.onclick = function() { startSearch(); };
+                    
+                    const actionDiv = document.createElement('div');
+                    actionDiv.className = 'search-actions';
+                    actionDiv.style.marginTop = '20px';
+                    actionDiv.appendChild(retryButton);
+                    noResults.appendChild(actionDiv);
+                });
+        };
+        
+        // Применяем debounce к функции поиска
+        const debouncedStartSearch = debounce(function() {
+                startSearch();
+        }, 300); // 300ms debounce
+        
+        // Обновляем обработчики событий
+        searchButton.addEventListener('click', function() {
+            debouncedStartSearch();
+        });
+        
+        phoneInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                debouncedStartSearch();
+            }
+        });
+        
+        document.getElementById('open-bot').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.open('https://t.me/ReFinDOsintBot', '_blank');
+        });
+        
+        // Инициализируем модальное окно для логов
+        const initLogsModal = function() {
+            // Создаем модальное окно для логов, если оно еще не существует
+            if (!document.getElementById('logs-modal')) {
+                const modalHTML = `
+<div id="logs-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+                            <h2><i class="fas fa-terminal"></i> Логи системы</h2>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="logs-controls">
+                                <button id="refresh-logs" class="logs-button">
+                                    <i class="fas fa-sync-alt"></i> Обновить
+                                </button>
+                <div class="logs-filter">
+                    <label>
+                                        <input type="checkbox" class="log-level-filter" value="INFO" checked> Информация
+                    </label>
+                    <label>
+                                        <input type="checkbox" class="log-level-filter" value="WARNING" checked> Предупреждения
+                    </label>
+                    <label>
+                                        <input type="checkbox" class="log-level-filter" value="ERROR" checked> Ошибки
+                    </label>
+                    <label>
+                                        <input type="checkbox" class="log-level-filter" value="DEBUG"> Отладка
+                    </label>
+                </div>
+            </div>
+            <div class="logs-container">
+                                <div id="logs-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+            
+            // Инициализируем обработчики событий для модального окна
+        const modal = document.getElementById('logs-modal');
+            if (modal) {
+                const closeBtn = modal.querySelector('.close-modal');
+                const refreshBtn = document.getElementById('refresh-logs');
+                
+                // Кнопка закрытия модального окна
+                closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+                // Закрытие по клику вне модального окна
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+        
+                // Кнопка обновления логов
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', function() {
+                        if (window.ReFind && window.ReFind.api && window.ReFind.api.loadLogs) {
+                            window.ReFind.api.loadLogs();
+                        }
+                    });
+                }
+                
+                // Фильтры логов
+                const logFilters = document.querySelectorAll('.log-level-filter');
+                logFilters.forEach(filter => {
+                    filter.addEventListener('change', function() {
+                        if (window.ReFind && window.ReFind.api && window.ReFind.api.filterLogs) {
+                            window.ReFind.api.filterLogs();
+                        }
+                    });
+                });
+            }
+            
+            // Добавляем обработчик для кнопки логов
+            const logsButton = document.getElementById('logs-button');
+            if (logsButton) {
+                logsButton.addEventListener('click', function() {
+        const modal = document.getElementById('logs-modal');
+                    if (modal) {
+                        modal.style.display = 'block';
+                        
+                        // Загружаем логи, если есть функция загрузки
+                        if (window.ReFind && window.ReFind.api && window.ReFind.api.loadLogs) {
+                            window.ReFind.api.loadLogs();
+                    } else {
+                            // Если функции загрузки нет, показываем сообщение
+        const logsContent = document.getElementById('logs-content');
+                            if (logsContent) {
+                                logsContent.innerHTML = 
+                                    '<div class="log-entry log-INFO">Система логирования не инициализирована</div>';
+                            }
+                        }
+                    } else {
+                        console.error('Модальное окно логов не найдено');
+                    }
+                });
+        }
+        };
+        
+        // Инициализируем элементы интерфейса
+        updateLoadingState();
+        
+        // Инициализируем модальное окно
+        initLogsModal();
+    });
+</script>
+
+<!-- Убираем текущий блок уведомления о кулдауне -->
+<div class="cooldown-info" style="display: none;">
+    <i class="fas fa-clock"></i> Ограничение: 1 запрос в 90 секунд
+    <div id="cooldown-timer" style="display: none; margin-top: 5px;">
+        Следующий поиск будет доступен через <span id="cooldown-seconds">90</span> сек.
+    </div>
+</div>
+
+<!-- Удаляем стили для всплывающего уведомления о кулдауне в правом верхнем углу -->
+<style>
+    /* Стили для всплывающего уведомления о кулдауне */
+    .cooldown-toast {
+        display: none;
+    }
+</style>
+
+<!-- Удаляем HTML для всплывающего уведомления -->
+<!-- <div id="cooldown-toast" class="cooldown-toast">
+    <div class="cooldown-toast-icon">
+        <i class="fas fa-clock"></i>
+    </div>
+    <div class="cooldown-toast-content">
+        <div class="cooldown-toast-title">Ограничение поиска</div>
+        <div class="cooldown-toast-message">Следующий запрос будет доступен через <span id="toast-cooldown-seconds">90</span> сек.</div>
+    </div>
+    <div class="cooldown-toast-progress"></div>
+</div> -->
+
+<script>
+    // Обновляем реализацию кулдауна для использования стандартного элемента ошибки
+    document.addEventListener('DOMContentLoaded', function() {
+        // Переменные для отслеживания кулдауна
+        let isInCooldown = false;
+        let cooldownTimer = null;
+        let cooldownSeconds = 90;
+        const searchButton = document.getElementById('search-button');
+        const phoneError = document.getElementById('phone-error');
+        
+        // Проверяем состояние кулдауна в localStorage при загрузке страницы
+        function checkCooldownStatus() {
+            const savedCooldownData = localStorage.getItem('searchCooldownData');
+            if (savedCooldownData) {
+                try {
+                    const cooldownData = JSON.parse(savedCooldownData);
+                    const now = Date.now();
+                    const expirationTime = cooldownData.expirationTime;
+                    
+                    // Если время истечения кулдауна еще не наступило
+                    if (expirationTime > now) {
+                        // Рассчитываем оставшееся время
+                        const remainingSeconds = Math.ceil((expirationTime - now) / 1000);
+                        if (remainingSeconds > 0) {
+                            startCooldown(remainingSeconds);
+                            return true;
+                        }
+                    }
+                    } catch (e) {
+                    console.error('Ошибка при проверке статуса кулдауна:', e);
+                }
+                
+                // Если кулдаун истек или произошла ошибка, очищаем данные
+                localStorage.removeItem('searchCooldownData');
+            }
+            return false;
+        }
+        
+        // Сохраняем состояние кулдауна в localStorage
+        function saveCooldownState(duration) {
+            const expirationTime = Date.now() + (duration * 1000);
+            const cooldownData = {
+                expirationTime: expirationTime,
+                duration: duration
+            };
+            localStorage.setItem('searchCooldownData', JSON.stringify(cooldownData));
+        }
+        
+        // Функция для запуска кулдауна
+        function startCooldown(duration = 90) {
+            isInCooldown = true;
+            cooldownSeconds = duration;
+            
+            // Показываем сообщение об ошибке
+            if (phoneError) {
+                phoneError.textContent = `Ограничение поиска: следующий запрос будет доступен через ${cooldownSeconds} сек.`;
+                phoneError.style.display = 'block';
+            }
+            
+            searchButton.classList.add('cooldown');
+            searchButton.disabled = true;
+            
+            // Сохраняем состояние кулдауна
+            saveCooldownState(cooldownSeconds);
+            
+            // Обновляем таймер каждую секунду
+            cooldownTimer = setInterval(function() {
+                cooldownSeconds--;
+                
+                // Обновляем текст ошибки
+                if (phoneError) {
+                    phoneError.textContent = `Ограничение поиска: следующий запрос будет доступен через ${cooldownSeconds} сек.`;
+                }
+                
+                // Обновляем данные в localStorage
+                saveCooldownState(cooldownSeconds);
+                
+                if (cooldownSeconds <= 0) {
+                    endCooldown();
+                }
+            }, 1000);
+        }
+        
+        // Функция для завершения кулдауна
+        function endCooldown() {
+            isInCooldown = false;
+            clearInterval(cooldownTimer);
+            
+            // Скрываем сообщение об ошибке
+            if (phoneError) {
+                phoneError.style.display = 'none';
+            }
+            
+            searchButton.classList.remove('cooldown');
+            searchButton.disabled = false;
+            
+            // Удаляем данные о кулдауне из localStorage
+            localStorage.removeItem('searchCooldownData');
+        }
+        
+        // Модифицируем функцию startSearch для учета кулдауна
+        const originalStartSearch = window.startSearch;
+        window.startSearch = function() {
+            // Если активен кулдаун, не выполняем поиск
+            if (isInCooldown) {
+                console.log('Поиск в кулдауне, пожалуйста подождите');
+                
+                // Показываем сообщение об ошибке
+                if (phoneError) {
+                    phoneError.textContent = `Ограничение поиска: следующий запрос будет доступен через ${cooldownSeconds} сек.`;
+                    phoneError.style.display = 'block';
+                }
+                
+                return;
+            }
+            
+            // Проверяем валидность номера телефона
+            const phone = document.getElementById('phone-input').value.trim();
+            if (!validatePhoneNumber(phone)) {
+                if (phoneError) {
+                    phoneError.textContent = "Номер телефона должен содержать 11 цифр и начинаться с 7 или 8";
+                    phoneError.style.display = 'block';
+                }
+                return;
+            }
+            
+            phoneError.style.display = 'none';
+            
+            // Запускаем оригинальную функцию поиска
+            // Оборачиваем в try-catch для перехвата ошибок
+            try {
+                // Создаем промис для отслеживания результата поиска
+                const searchPromise = new Promise((resolve, reject) => {
+                    // Сохраняем оригинальную функцию displayResults
+                    const originalDisplayResults = window.displayResults;
+                    
+                    // Временно заменяем displayResults
+                    window.displayResults = function(data, phoneNumber) {
+                        // Если есть ошибка, не запускаем кулдаун
+                        if (data.error) {
+                            resolve(false); // Ошибка, не запускаем кулдаун
+                    } else {
+                            resolve(true); // Успех, запускаем кулдаун
+                        }
+                        
+                        // Вызываем оригинальную функцию
+                        originalDisplayResults(data, phoneNumber);
+                        
+                        // Восстанавливаем оригинальную функцию
+                        window.displayResults = originalDisplayResults;
+                    };
+                    
+                    // Вызываем оригинальную функцию поиска
+                    originalStartSearch.apply(this, arguments);
+                });
+                
+                // Обрабатываем результат поиска
+                searchPromise.then(shouldStartCooldown => {
+                    if (shouldStartCooldown) {
+                        // Запускаем кулдаун только при успешном поиске
+                        startCooldown();
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка при выполнении поиска:', error);
+                // Не запускаем кулдаун при ошибке
+                originalStartSearch.apply(this, arguments);
+            }
+        };
+        
+        // Функция для проверки формата номера телефона
+        function validatePhoneNumber(phone) {
+            // Удаляем все нецифровые символы
+            const cleanPhone = phone.replace(/\D/g, '');
+            
+            // Проверяем, что номер состоит из 11 цифр и начинается с 7 или 8
+            return /^[78]\d{10}$/.test(cleanPhone);
+        }
+        
+        // Проверяем состояние кулдауна при загрузке страницы
+        checkCooldownStatus();
+        
+        // Добавляем обработку для кнопки прокрутки наверх
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+        
+        if (scrollToTopBtn) {
+            // Показывать кнопку только при прокрутке вниз
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    scrollToTopBtn.classList.add('visible');
+                } else {
+                    scrollToTopBtn.classList.remove('visible');
+                }
+            });
+            
+            // Обработчик клика для прокрутки наверх
+            scrollToTopBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    });
+</script>
+
+<!-- Добавляем кнопку для прокрутки наверх -->
+<a href="#" id="scrollToTop" aria-label="Прокрутить наверх">
+    <i class="fas fa-chevron-up"></i>
+</a>
+
+</body>
+</html> 

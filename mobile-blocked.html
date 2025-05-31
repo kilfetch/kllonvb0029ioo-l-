@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доступ ограничен | ReFind</title>
+    <link rel="stylesheet" href="https:
+    <style>
+        :root {
+            --primary-color: #0f0f0f;
+            --accent-color: #4D74FF;
+            --text-color: #F0F0F0;
+            --error-color: #FF6B6B;
+            --warning-color: #FFD166;
+            --success-color: #06D6A0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1c1c1c 100%);
+        }
+        
+        .container {
+            max-width: 90%;
+            width: 100%;
+            background: rgba(30, 30, 30, 0.5);
+            border-radius: 16px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            text-align: center;
+            border: 1px solid #333;
+            backdrop-filter: blur(5px);
+        }
+        
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: #fff;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            background: linear-gradient(120deg, #fff, rgba(255,255,255,0.7), #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 6s linear infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+            100% { background-position: 0% center; }
+        }
+        
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .warning-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--warning-color);
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 24px;
+            background-color: #2A2A2A;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(145deg, #4369e8, #5a83ff);
+            color: white;
+            border: none;
+        }
+        
+        .btn-warning {
+            background-color: #2A2A2A;
+            color: #fff;
+            border: 1px solid #333;
+        }
+        
+        .btn i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .security-badge {
+            margin-top: 40px;
+            padding: 8px 16px;
+            background-color: rgba(6, 214, 160, 0.1);
+            color: var(--success-color);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        @media (min-width: 600px) {
+            .container {
+                max-width: 500px;
+            }
+            
+            .action-buttons {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="/assets/img/wpeA3eVCpHOxX3g6xC.png" alt="ReFind Logo" class="logo">
+        <h1>Доступ с мобильных устройств ограничен</h1>
+        
+        <p>В целях безопасности и оптимизации работы системы, доступ к сайту ReFind с мобильных устройств временно ограничен.</p>
+        
+        <p>Для получения доступа к нашим сервисам, пожалуйста, воспользуйтесь альтернативными способами:</p>
+        
+        <div class="action-buttons">
+            <a href="https:
+                <i class="fab fa-telegram-plane"></i>
+                Наш Telegram бот
+            </a>
+            <a href="https:
+                <i class="fas fa-newspaper"></i>
+                Канал с новостями
+            </a>
+        </div>
+
+        <p class="footer">© ReFind 2025. Все права зашифрованы @misha_z88s'ой</p>
+    </div>
+    
+    <script>
+        
+        (function() {
+            
+            const requestLimit = 50;
+            const timeWindow = 10000; 
+            
+            let requestCount = parseInt(localStorage.getItem('requestCount') || '0');
+            let lastRequestTime = parseInt(localStorage.getItem('lastRequestTime') || '0');
+            
+            const now = Date.now();
+
+            if (now - lastRequestTime > timeWindow) {
+                requestCount = 0;
+            }
+
+            requestCount++;
+            localStorage.setItem('requestCount', requestCount.toString());
+            localStorage.setItem('lastRequestTime', now.toString());
+
+            if (requestCount > requestLimit) {
+                
+                document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;text-align:center;padding:20px;background:#0f0f0f;"><div><h1 style="font-size:2rem;color:#fff;margin-bottom:20px;">Доступ временно ограничен</h1><p style="color:#ccc;font-size:1.1rem;">Обнаружена подозрительная активность. Пожалуйста, попробуйте позже.</p></div></div>';
+
+                setTimeout(() => {
+                    localStorage.setItem('requestCount', '0');
+                }, 60000);
+            }
+        })();
+
+        if (sessionStorage) {
+            sessionStorage.setItem('redirected_to_mobile_blocked', 'true');
+        }
+    </script>
+</body>
+</html> 

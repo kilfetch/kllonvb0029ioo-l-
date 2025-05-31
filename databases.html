@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <script src="/js/mobile-redirect.js"></script>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Базы данных | ReFind</title>
+  <meta name="description" content="Список доступных баз данных для поиска утечек"/>
+  <meta name="theme-color" content="#121212"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+  <meta name="format-detection" content="telephone=no"/>
+  <meta name="robots" content="index, follow"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self';">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta name="referrer" content="no-referrer">
+
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"></noscript>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <script src="/js/config.js"></script>
+  <script src="/js/api-helper.js"></script>
+  <script defer src="/js/script.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    body {
+      background-color: #0A0A0A;
+      color: #FFF;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+      text-rendering: optimizeSpeed;
+    }
+    
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background-color: rgba(12, 12, 12, 0.85);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .navbar.scrolled {
+      padding: 12px 24px;
+      background-color: rgba(10, 10, 10, 0.9);
+    }
+    
+    .navbar a img.ref {
+      height: 48px;
+      object-fit: contain;
+      max-width: 100%;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .navbar.scrolled a img.ref {
+      height: 40px;
+    }
+    
+    .desktop-menu {
+      display: flex;
+      gap: 16px;
+      margin-left: auto;
+    }
+    
+    .nav-button {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #121212;
+      color: #FFF;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      letter-spacing: 0.3px;
+    }
+    
+    .nav-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    .nav-button.active {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .menu-data {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 80%;
+      height: 100vh;
+      background-color: rgba(10, 10, 10, 0.98);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      z-index: 999;
+      box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+      flex-direction: column;
+      justify-content: flex-start;
+      padding-top: 80px;
+      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .menu-data.active {
+      right: 0;
+      display: flex;
+    }
+    
+    .menu-data a {
+      display: block;
+      margin: 15px 25px;
+      font-size: 1.2rem;
+      text-align: center;
+      padding: 12px 15px;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+    
+    .menu-data a:hover, .menu-data a:active {
+      background-color: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+    
+    #Menu-bar {
+      display: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      padding: 10px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      transition: all 0.3s ease;
+    }
+    
+    .hero-section {
+      flex: 1;
+      background: #0A0A0A;
+      display: flex;
+      flex-direction: column;
+      padding-top: 80px;
+      position: relative;
+      min-height: 100vh;
+    }
+    
+    .hero-content {
+      width: 90%;
+      max-width: 800px;
+      margin: 3rem auto 2rem;
+      text-align: center;
+    }
+    
+    .hero-title {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.7));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 700px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.6;
+    }
+    
+    .search-stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 30px 0;
+    }
+    
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: rgba(30, 30, 30, 0.4);
+      padding: 15px 25px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      min-width: 160px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .stat-item:hover {
+      transform: translateY(-5px);
+      background-color: rgba(40, 40, 40, 0.6);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stat-item i {
+      font-size: 2rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 10px;
+    }
+    
+    .stat-item span {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.8));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .stat-item .stat-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 5px;
+      background: none;
+      -webkit-background-clip: initial;
+      background-clip: initial;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .databases-container {
+      width: 90%;
+      max-width: 1000px;
+      margin: 0 auto 3rem;
+      animation: fadeIn 0.8s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .database-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .database-card {
+      background-color: rgba(25, 25, 25, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: fadeIn 0.5s ease-out forwards;
+      animation-fill-mode: both;
+      opacity: 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      min-height: 120px;
+      justify-content: space-between;
+    }
+    
+    .database-card:nth-child(1) { animation-delay: 0.05s; }
+    .database-card:nth-child(2) { animation-delay: 0.1s; }
+    .database-card:nth-child(3) { animation-delay: 0.15s; }
+    .database-card:nth-child(4) { animation-delay: 0.2s; }
+    .database-card:nth-child(5) { animation-delay: 0.25s; }
+    
+    .database-card:hover {
+      background-color: rgba(40, 40, 40, 0.6);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .database-name {
+      font-size: 1.2rem;
+      color: #fff;
+      margin-bottom: 15px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      word-break: break-word;
+    }
+    
+    .database-name i {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    
+    .database-description {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+    
+    .database-meta {
+      background-color: rgba(15, 15, 15, 0.5);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .meta-item {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .meta-label {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .meta-value {
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .database-fields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 15px;
+    }
+    
+    .field-tag {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.8);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .field-tag:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .loader-container {
+      text-align: center;
+      padding: 50px 0;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .loader {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loader-text {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.1rem;
+      letter-spacing: 0.3px;
+    }
+    
+    .error-message {
+      background-color: rgba(40, 40, 40, 0.4);
+      border-left: 4px solid #777;
+      padding: 20px;
+      margin: 30px 0;
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .error-message:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .error-icon {
+      font-size: 24px;
+      color: #aaa;
+    }
+    
+    .error-content {
+      flex: 1;
+    }
+    
+    .error-title {
+      font-size: 1.2rem;
+      color: #ddd;
+      margin-bottom: 10px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    
+    .error-description {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      line-height: 1.6;
+      letter-spacing: 0.2px;
+    }
+    
+    .info-message {
+      background-color: rgba(40, 40, 40, 0.4);
+      border-left: 4px solid #666;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .info-icon {
+      font-size: 20px;
+      color: #888;
+    }
+    
+    .info-text {
+      flex: 1;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.95rem;
+      letter-spacing: 0.2px;
+    }
+    
+    #scrollToTop {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background-color: rgba(25, 25, 25, 0.5);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      text-decoration: none;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 99;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    #scrollToTop.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    #scrollToTop:hover {
+      background-color: rgba(35, 35, 35, 0.7);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+    }
+    
+    @media (max-width: 768px) {
+      .desktop-menu {
+        display: none;
+      }
+      #Menu-bar {
+        display: block;
+      }
+      .hero-title {
+        font-size: 2.2rem;
+      }
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+      .search-stats {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+      }
+      .stat-item {
+        width: 100%;
+        max-width: 200px;
+      }
+      .database-cards {
+        grid-template-columns: 1fr;
+      }
+      .databases-container {
+        padding: 0 1rem;
+      }
+      #scrollToTop {
+        right: 20px;
+        bottom: 20px;
+        width: 45px;
+        height: 45px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar" class="navbar">
+    <a href="/index.html">
+      <img alt="ReFind" class="ref" loading="lazy" src="/assets/img/jasdjasdj.png"/>
+    </a>
+    <div class="desktop-menu">
+      <a href="/index.html" class="nav-button">Главная</a>
+      <a href="/news.html" class="nav-button">Новости</a>
+      <a href="/api.html" class="nav-button">API</a>
+      <a href="/search.html" class="nav-button">Поиск</a>
+      <a href="/databases.html" class="nav-button active">Базы данных</a>
+    </div>
+    <div id="Menu-bar">
+      <i class="fas fa-bars size-icon"></i>
+    </div>
+  </div>
+  
+  <div class="menu-data">
+    <a href="/index.html">Главная</a>
+    <a href="/news.html">Новости</a>
+    <a href="/api.html">API</a>
+    <a href="/search.html">Поиск</a>
+    <a href="/databases.html">Базы данных</a>
+    <div id="close">
+      <i class="fas fa-times"></i>
+    </div>
+  </div>
+  
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">Базы данных ReFind</h1>
+      <p class="hero-subtitle">Полный каталог доступных баз данных для поиска утекших персональных данных</p>
+      <div class="search-stats">
+        <div class="stat-item">
+          <i class="fas fa-database"></i>
+          <span id="db-count">0</span>
+          <span class="stat-label">баз данных</span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-hdd"></i>
+          <span id="record-count">0</span>
+          <span class="stat-label">ГБ информации</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="databases-container">
+      <div id="loader-container" class="loader-container">
+        <div class="loader"></div>
+        <p class="loader-text">Загрузка базы данных...</p>
+      </div>
+      <div id="error-container" style="display: none;"></div>
+      <div id="databases-container" class="database-cards" style="display: none;"></div>
+    </div>
+  </div>
+  
+  <a href="#" id="scrollToTop" aria-label="Прокрутить наверх">
+    <i class="fas fa-chevron-up"></i>
+  </a>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('Menu-bar').addEventListener('click', function() {
+        document.querySelector('.menu-data').classList.add('active');
+      });
+      
+      document.getElementById('close').addEventListener('click', function() {
+        document.querySelector('.menu-data').classList.remove('active');
+      });
+      
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 50) {
+          document.querySelector('.navbar').classList.add('scrolled');
+        } else {
+          document.querySelector('.navbar').classList.remove('scrolled');
+        }
+      });
+      
+      const scrollToTopBtn = document.getElementById('scrollToTop');
+      if (scrollToTopBtn) {
+        window.addEventListener('scroll', function() {
+          if (window.pageYOffset > 300) {
+            scrollToTopBtn.classList.add('visible');
+          } else {
+            scrollToTopBtn.classList.remove('visible');
+          }
+        });
+        
+        scrollToTopBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        });
+      }
+      
+      loadDatabases();
+    });
+    
+    function loadDatabases() {
+      const loaderContainer = document.getElementById('loader-container');
+      const errorContainer = document.getElementById('error-container');
+      const databasesContainer = document.getElementById('databases-container');
+      
+      const cachedData = getCachedDatabases();
+      if (cachedData) {
+        loaderContainer.style.display = 'none';
+        displayDatabases(cachedData);
+        databasesContainer.style.display = 'grid';
+        
+        const infoMsg = document.createElement('div');
+        infoMsg.className = 'info-message';
+        infoMsg.innerHTML = `
+          <div class="info-icon"><i class="fas fa-info-circle"></i></div>
+          <div class="info-text">
+            Информация загружена из кэша. <a href="#" id="refresh-btn" style="color:#aaa;text-decoration:underline;">Обновить данные</a>
+          </div>
+        `;
+        databasesContainer.parentNode.insertBefore(infoMsg, databasesContainer);
+        
+        document.getElementById('refresh-btn').addEventListener('click', function(e) {
+          e.preventDefault();
+          localStorage.removeItem('databases_cache');
+          localStorage.removeItem('databases_cache_time');
+          location.reload();
+        });
+        return;
+      }
+      
+      const apiKey = window.ReFind && window.ReFind.config ? window.ReFind.config.api_key : '5386c7fd-f568-49f8-a36e-db8d2e705bdc';
+      const baseUrl = window.location.protocol + '//' + window.location.host;
+      const apiUrl = `${baseUrl}/databases?api_key=${apiKey}`;
+      
+      loaderContainer.style.display = 'flex';
+      errorContainer.style.display = 'none';
+      databasesContainer.style.display = 'none';
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      
+      fetch(apiUrl, { signal: controller.signal })
+        .then(response => {
+          clearTimeout(timeoutId);
+          if (!response.ok) {
+            throw new Error(`Ошибка HTTP: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          loaderContainer.style.display = 'none';
+          
+          if (data && data.databases && Array.isArray(data.databases) && data.databases.length > 0) {
+            cacheDatabases(data.databases);
+            
+            displayDatabases(data.databases);
+            databasesContainer.style.display = 'grid';
+            
+            if (data.all) {
+              const infoMsg = document.createElement('div');
+              infoMsg.className = 'info-message';
+              infoMsg.innerHTML = `
+                <div class="info-icon"><i class="fas fa-database"></i></div>
+                <div class="info-text">
+                  Общий размер всех баз данных: <strong>${data.all} ГБ</strong>
+                </div>
+              `;
+              databasesContainer.parentNode.insertBefore(infoMsg, databasesContainer);
+            }
+          } else {
+            showError('Базы данных не найдены', 'Не удалось загрузить информацию о базах данных. Пожалуйста, попробуйте позже.');
+          }
+        })
+        .catch(error => {
+          loaderContainer.style.display = 'none';
+          
+          let errorMessage = error.message;
+          if (error.name === 'AbortError') {
+            errorMessage = 'Превышено время ожидания ответа от сервера';
+          }
+          
+          showError('Ошибка загрузки', `Не удалось загрузить базы данных: ${errorMessage}`);
+          console.error('Ошибка при загрузке баз данных:', error);
+        });
+    }
+    
+    function cacheDatabases(databases) {
+      try {
+        localStorage.setItem('databases_cache', JSON.stringify(databases));
+        localStorage.setItem('databases_cache_time', Date.now().toString());
+      } catch (e) {
+        console.error('Ошибка при кэшировании баз данных:', e);
+      }
+    }
+    
+    function getCachedDatabases() {
+      try {
+        const cacheTime = localStorage.getItem('databases_cache_time');
+        const cacheData = localStorage.getItem('databases_cache');
+        
+        if (!cacheTime || !cacheData) {
+          return null;
+        }
+        
+        const cacheAge = Date.now() - parseInt(cacheTime);
+        if (cacheAge > 30 * 60 * 1000) {
+          return null;
+        }
+        
+        return JSON.parse(cacheData);
+      } catch (e) {
+        console.error('Ошибка при получении кэшированных баз данных:', e);
+        return null;
+      }
+    }
+    
+    function displayDatabases(databases) {
+      const databasesContainer = document.getElementById('databases-container');
+      
+      databasesContainer.innerHTML = '';
+      
+      databases.sort((a, b) => (b.size || 0) - (a.size || 0));
+      
+      updateDatabaseStats(databases);
+      
+      databases.forEach((db, index) => {
+        let icon = 'fa-database';
+        
+        const name = db.name.toLowerCase();
+        if (name.includes('phone') || name.includes('номер') || name.includes('абонент') ||
+            name.includes('numbuster') || name.includes('getcontact') || name.includes('teleg')) {
+          icon = 'fa-phone';
+        } else if (name.includes('email') || name.includes('mail') || name.includes('почт')) {
+          icon = 'fa-envelope';
+        } else if (name.includes('pass') || name.includes('паспорт') || name.includes('госуслуги') ||
+                 name.includes('налог') || name.includes('емиас')) {
+          icon = 'fa-id-card';
+        } else if (name.includes('вконтакт') || name.includes('vk') || name.includes('ok.ru') ||
+                  name.includes('однокласс') || name.includes('инстаграм') || name.includes('facebook')) {
+          icon = 'fa-user';
+        }
+        
+        const databaseCard = document.createElement('div');
+        databaseCard.className = 'database-card';
+        databaseCard.style.animationDelay = `${0.05 * (index % 10)}s`;
+        
+        const formattedSize = db.size ? `${db.size} ГБ` : 'Размер неизвестен';
+        
+        databaseCard.innerHTML = `
+          <div class="database-name">
+            <i class="fas ${icon}"></i>
+            ${escapeHtml(db.name)}
+          </div>
+          <div class="database-meta">
+            <div class="meta-item">
+              <span class="meta-label">Размер:</span>
+              <span class="meta-value">${formattedSize}</span>
+            </div>
+          </div>
+        `;
+        
+        databasesContainer.appendChild(databaseCard);
+      });
+    }
+    
+    function updateDatabaseStats(databases) {
+      const dbCountElement = document.getElementById('db-count');
+      const recordCountElement = document.getElementById('record-count');
+      
+      if (dbCountElement) {
+        animateCounter(dbCountElement, 0, databases.length, 1000);
+      }
+      
+      if (recordCountElement) {
+        const totalSize = databases.reduce((sum, db) => sum + (db.size || 0), 0);
+        
+        animateCounter(recordCountElement, 0, Math.round(totalSize), 1500);
+      }
+    }
+    
+    function animateCounter(element, start, end, duration) {
+      let startTimestamp = null;
+      
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const currentValue = Math.floor(progress * (end - start) + start);
+        
+        element.textContent = formatNumber(currentValue);
+        
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          element.textContent = formatNumber(end);
+        }
+      };
+      
+      window.requestAnimationFrame(step);
+    }
+    
+    function showError(title, message) {
+      const errorContainer = document.getElementById('error-container');
+      
+      errorContainer.innerHTML = '';
+      
+      const errorElement = document.createElement('div');
+      errorElement.className = 'error-message';
+      
+      errorElement.innerHTML = `
+        <div class="error-icon"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="error-content">
+          <div class="error-title">${escapeHtml(title)}</div>
+          <div class="error-description">${escapeHtml(message)}</div>
+        </div>
+      `;
+      
+      errorContainer.appendChild(errorElement);
+      
+      errorContainer.style.display = 'block';
+    }
+    
+    function escapeHtml(text) {
+      if (text === undefined || text === null) {
+        return '';
+      }
+      
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      
+      return text.toString().replace(/[&<>"']/g, m => map[m]);
+    }
+    
+    function formatNumber(number) {
+      return new Intl.NumberFormat('ru-RU').format(number);
+    }
+    
+    function formatDate(dateString) {
+      if (!dateString) return 'Не указано';
+      
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+          return dateString;
+        }
+        return date.toLocaleDateString('ru-RU', options);
+      } catch (e) {
+        return dateString;
+      }
+    }
+  </script>
+  
+  <script>
+    // Скрипт для кнопки прокрутки наверх - убедимся, что он работает
+    document.addEventListener('DOMContentLoaded', function() {
+      const scrollToTopBtn = document.getElementById('scrollToTop');
+      
+      if (scrollToTopBtn) {
+        // Показывать кнопку только при прокрутке вниз
+        window.addEventListener('scroll', function() {
+          if (window.pageYOffset > 300) {
+            scrollToTopBtn.classList.add('visible');
+          } else {
+            scrollToTopBtn.classList.remove('visible');
+          }
+        });
+        
+        // Обработчик клика для прокрутки наверх
+        scrollToTopBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+{
+    "document": {
+        "type": "FRAME",
+        "name": "ReFind Design",
+        "backgroundColor": "#0A0F1D",
+        "children": [
+            {
+                "type": "TEXT",
+                "name": "Header",
+                "characters": "ReFind",
+                "fontSize": 24,
+                "color": "#FFFFFF",
+                "position": {
+                    "x": 20,
+                    "y": 20
+                }
+            },
+            {
+                "type": "RECTANGLE",
+                "name": "Search Box",
+                "width": 400,
+                "height": 50,
+                "cornerRadius": 8,
+                "fill": "#FFFFFF",
+                "position": {
+                    "x": 200,
+                    "y": 100
+                }
+            },
+            {
+                "type": "TEXT",
+                "name": "Placeholder Text",
+                "characters": "Введите номер",
+                "fontSize": 16,
+                "color": "#A0A0A0",
+                "position": {
+                    "x": 220,
+                    "y": 115
+                }
+            },
+            {
+                "type": "RECTANGLE",
+                "name": "Search Button",
+                "width": 50,
+                "height": 50,
+                "cornerRadius": 8,
+                "fill": "#0055FF",
+                "position": {
+                    "x": 610,
+                    "y": 100
+                }
+            },
+            {
+                "type": "TEXT",
+                "name": "Search Icon",
+                "characters": "🔍",
+                "fontSize": 24,
+                "color": "#FFFFFF",
+                "position": {
+                    "x": 625,
+                    "y": 115
+                }
+            },
+            {
+                "type": "TEXT",
+                "name": "Error Message",
+                "characters": "Введите корректный номер телефона (например: 79999999999)",
+                "fontSize": 14,
+                "color": "#FF5555",
+                "position": {
+                    "x": 200,
+                    "y": 160
+                }
+            }
+        ]
+    }
+}

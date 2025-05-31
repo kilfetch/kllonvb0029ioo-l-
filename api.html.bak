@@ -1,0 +1,2957 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<script src="/js/mobile-redirect.js"></script>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+<meta http-equiv="Cache-Control" content="max-age=86400" />
+<meta http-equiv="Expires" content="86400" />
+<title>ReFind API Documentation</title>
+<meta name="description" content="Документация по использованию API сервиса ReFind для поиска по базам данных утечек"/>
+<meta name="theme-color" content="#121212"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="format-detection" content="telephone=no"/>
+<meta name="robots" content="index, follow"/>
+
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta name="referrer" content="no-referrer">
+
+
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"></noscript>
+<link rel="preload" href="/css/news.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="/css/news.css" rel="stylesheet"></noscript>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+
+<style>
+        /* Основные стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: #0A0A0A;
+            color: #FFF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+            text-rendering: optimizeSpeed;
+        }
+        
+        /* Навигационная панель */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background-color: rgba(12, 12, 12, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+        
+        .navbar.scrolled {
+            padding: 12px 24px;
+            background-color: rgba(10, 10, 10, 0.9);
+        }
+        
+        .ref {
+            width: auto;
+            height: 48px;
+            object-fit: contain;
+            max-width: 100%;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .navbar.scrolled .ref {
+            height: 40px;
+        }
+        
+        .desktop-menu {
+            display: flex;
+            gap: 16px;
+            margin-left: auto;
+        }
+        
+        .nav-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: transparent;
+            color: #FFF;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .nav-button.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        #Menu-bar {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        #Menu-bar:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Основной контент */
+        .hero-section {
+            flex: 1;
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            padding-top: 100px; /* Увеличенный отступ для фиксированной навигационной панели */
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+        
+        .api-container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+        
+        .api-intro {
+            margin-bottom: 3.5rem;
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
+        }
+        
+        /* Только эти элементы могут быть центрированы */
+        .api-title {
+            font-size: calc(2rem + 1vw);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #FFF;
+            letter-spacing: -0.03em;
+            text-align: center;
+            background: linear-gradient(to right, #ffffff, #aaaaaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .api-subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+            text-align: center;
+        }
+        
+        /* Все остальные элементы с левым выравниванием */
+        .api-section {
+            margin-bottom: 4rem;
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            animation-fill-mode: both;
+            animation-delay: 0.1s;
+            text-align: left;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+            background-color: rgba(20, 20, 20, 0.5);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .api-section-title {
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            text-align: left;
+            color: #ffffff;
+        }
+        
+        .api-section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transform: none;
+            width: 60px;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Стили для секции контента */
+        .section-content {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Стили для карточек с тарифами */
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .pricing-card {
+            background: linear-gradient(145deg, rgba(30, 30, 30, 0.7) 0%, rgba(20, 20, 20, 0.8) 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
+        
+        .pricing-card:hover::before {
+            left: 100%;
+        }
+        
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .pricing-card h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.3), transparent);
+        }
+        
+        .pricing-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .pricing-card li {
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            font-size: 1rem;
+        }
+        
+        .pricing-card li:last-child {
+            border-bottom: none;
+        }
+        
+        .price-item {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+        
+        .price {
+            font-weight: 600;
+            color: #fff;
+            font-size: 1.2rem;
+            position: relative;
+        }
+        
+        .price-tag {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Стили для подсекций */
+        .api-subsection {
+            margin-bottom: 2.5rem;
+        }
+        
+        .subsection-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Стили для важных примечаний */
+        .important-notes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .important-note {
+            background: linear-gradient(145deg, rgba(30, 30, 30, 0.7) 0%, rgba(20, 20, 20, 0.8) 100%);
+            border-radius: 12px;
+            padding: 1.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .important-note:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
+        
+        .important-note::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .note-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        
+        .note-content {
+            flex: 1;
+        }
+        
+        .note-content h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .note-content p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+        
+        /* Стиль для примечания */
+        .note {
+            background-color: rgba(50, 50, 50, 0.5);
+            border-left: 4px solid rgba(255, 255, 255, 0.2);
+            padding: 16px 20px;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            margin: 1.5rem 0;
+            line-height: 1.6;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Улучшенные стили для эндпоинтов API */
+        .api-endpoint {
+            background: linear-gradient(145deg, rgba(30, 30, 30, 0.7) 0%, rgba(20, 20, 20, 0.8) 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            animation-fill-mode: both;
+            animation-delay: calc(0.05s * var(--i));
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .api-endpoint::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .api-endpoint:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
+        
+        .api-endpoint:hover::before {
+            left: 100%;
+        }
+        
+        .endpoint-method {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-right: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: left;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .method-get {
+            background-color: rgba(100, 100, 100, 0.2);
+            color: #ffffff;
+            border-left: 3px solid rgba(200, 200, 200, 0.5);
+        }
+        
+        .method-post {
+            background-color: rgba(160, 160, 160, 0.15);
+            color: #e0e0e0;
+        }
+        
+        .method-put {
+            background-color: rgba(160, 160, 160, 0.15);
+            color: #e0e0e0;
+        }
+        
+        .method-delete {
+            background-color: rgba(160, 160, 160, 0.15);
+            color: #e0e0e0;
+        }
+        
+        .endpoint-url {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            font-size: 1.2rem;
+            word-break: break-all;
+            text-align: left;
+            color: #ffffff;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: inline-block;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .endpoint-description {
+            margin: 1.5rem 0;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            text-align: left;
+            font-size: 1.05rem;
+        }
+        
+        .endpoint-params {
+            margin-bottom: 2rem;
+            text-align: left;
+            background-color: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 3px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .param-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            text-align: left;
+        }
+        
+        .response-example .param-title {
+            text-align: left;
+        }
+        
+    /* Улучшенные стили для таблиц параметров */
+        .param-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow-x: auto;
+            display: block;
+            text-align: left;
+            margin-bottom: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            background-color: rgba(15, 15, 15, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .param-table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+            padding-bottom: 0.5rem;
+            /* Стилизуем полосу прокрутки */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.3);
+        }
+        
+        .param-table-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .param-table-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .param-table-container::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+    
+        .param-table thead {
+            background-color: rgba(40, 40, 40, 0.8);
+            position: sticky;
+            top: 0;
+        }
+        
+        .param-table th, .param-table td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .param-table th {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .param-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .param-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        .param-table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .param-required {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            background-color: rgba(180, 180, 180, 0.2);
+            color: #f0f0f0;
+            font-weight: 500;
+            text-align: left;
+        }
+        
+        .param-optional {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            background-color: rgba(100, 100, 100, 0.2);
+            color: #c0c0c0;
+            font-weight: 500;
+            text-align: left;
+        }
+        
+    /* Улучшенные стили для примеров кода */
+        .code-example {
+            background-color: rgba(20, 20, 20, 0.7);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 25px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+        
+        .code-example-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            background-color: rgba(30, 30, 30, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .code-example-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .code-example-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .code-example-action {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .code-action-red {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .code-action-yellow {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .code-action-green {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .code-example pre {
+            padding: 18px;
+            margin: 0;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.6;
+            tab-size: 4;
+            font-size: 15px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(0, 0, 0, 0.2);
+            /* Стилизуем полосу прокрутки */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.3);
+        }
+        
+        .code-example pre::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .code-example pre::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .code-example pre::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        
+        .code-line {
+            display: block;
+            padding: 3px 0;
+        }
+        
+    /* Улучшенные цвета для подсветки синтаксиса в монохромном стиле */
+        .code-key {
+        color: #e0e0e0;
+            font-weight: 500;
+        }
+        
+        .code-string {
+        color: #c0c0c0;
+        }
+        
+        .code-number {
+        color: #a0a0a0;
+        }
+        
+        .code-boolean {
+        color: #d0d0d0;
+        }
+        
+        .code-null {
+        color: #b0b0b0;
+        }
+        
+        .code-comment {
+        color: #707070;
+            font-style: italic;
+        }
+        
+        .code-method {
+        color: #e0e0e0;
+            font-weight: bold;
+        }
+        
+        .response-example {
+            margin-top: 2rem;
+            text-align: left;
+        }
+        
+    /* Анимации и декоративные элементы */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+    /* Стили для информационных карточек */
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .info-card {
+        background-color: rgba(22, 22, 22, 0.7);
+        border-radius: 12px;
+        padding: 1.8rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .info-card-icon {
+        background-color: rgba(160, 160, 160, 0.15);
+        color: #e0e0e0;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .info-card-content {
+        flex-grow: 1;
+    }
+    
+    .info-card-content h4 {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+        font-size: 1.2rem;
+        color: #fff;
+    }
+    
+    .info-card-content p {
+        margin: 0 0 1rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .api-url-box {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 12px;
+        margin: 10px 0;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .api-url-box code {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.5);
+        display: block;
+        padding: 0;
+        text-align: center;
+    }
+    
+    .secured-url {
+        position: relative;
+    }
+    
+    .security-note {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-align: center;
+        width: 100%;
+    }
+    
+    .security-note i {
+        margin-right: 5px;
+        color: #a0a0a0;
+    }
+    
+    /* Улучшенные стили для примеров ответов API */
+    .api-response-container {
+        background-color: rgba(22, 22, 22, 0.7);
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+    
+    .api-response-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background-color: rgba(30, 30, 30, 0.6);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .api-response-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .api-response-icon {
+        color: #a0a0a0;
+        font-size: 0.9rem;
+    }
+    
+    .api-response-status {
+        font-size: 0.8rem;
+        padding: 3px 8px;
+        border-radius: 4px;
+        background-color: rgba(160, 160, 160, 0.1);
+        color: #e0e0e0;
+    }
+    
+    .api-response-body {
+        padding: 16px;
+    }
+    
+    /* Стили для вкладок в примерах ответов */
+    .response-tabs {
+        display: flex;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .response-tab {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 2px solid transparent;
+    }
+    
+    .response-tab.active {
+        color: #fff;
+        border-bottom-color: #a0a0a0;
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .response-tab-content {
+        display: none;
+    }
+    
+    .response-tab-content.active {
+        display: block;
+    }
+    
+    /* Стили для форматированного вида ответа */
+    .formatted-response {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .response-item {
+        background-color: rgba(30, 30, 30, 0.5);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .response-item:hover {
+        transform: translateY(-3px);
+    }
+    
+    .response-item-header {
+        padding: 12px 16px;
+        background-color: rgba(30, 30, 30, 0.8);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .response-item-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    
+    .response-item-badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .response-item-body {
+        padding: 16px;
+    }
+    
+    .response-field {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: baseline;
+    }
+    
+    .response-field:last-child {
+        margin-bottom: 0;
+    }
+    
+    .response-field span {
+        min-width: 120px;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+    }
+    
+    .response-field strong {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+    }
+    
+    .tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background-color: rgba(160, 160, 160, 0.1);
+        color: #e0e0e0;
+        font-size: 0.85rem;
+        margin-right: 5px;
+    }
+    
+    .param-highlight {
+        color: #e0e0e0;
+        font-style: italic;
+    }
+    
+    /* Стили для раздела типов API ключей */
+    .section-description {
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 2rem;
+        max-width: 800px;
+        line-height: 1.6;
+    }
+    
+    /* Стили для раздела кодов ошибок */
+    .error-codes-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .error-code-card {
+        display: flex;
+        background-color: rgba(22, 22, 22, 0.7);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .error-code-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .error-code {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 100px;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.15);
+        background-color: rgba(20, 20, 20, 0.8);
+        padding: 1.5rem;
+        letter-spacing: -1px;
+    }
+    
+    .error-details {
+        padding: 1.5rem;
+        flex-grow: 1;
+    }
+    
+    .error-details h4 {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .error-details p {
+        margin: 0 0 1rem 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    .error-example {
+        margin-top: 1rem;
+    }
+    
+    .error-example .code-example {
+        margin: 0;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+    
+    /* Кнопка "Наверх" */
+    .scroll-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        background-color: rgba(25, 25, 25, 0.8);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 99;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .scroll-to-top.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .scroll-to-top:hover {
+        transform: translateY(-5px);
+        background-color: rgba(30, 30, 30, 0.9);
+    }
+    
+    /* Улучшенные стили для мобильной версии */
+    @media (max-width: 768px) {
+        .desktop-menu {
+            display: none;
+        }
+        
+        #Menu-bar {
+            display: block;
+        }
+        
+        .api-container {
+            padding: 1.5rem 1rem;
+            width: 95%;
+        }
+        
+        .api-title {
+            font-size: 1.8rem;
+        }
+        
+        .api-subtitle {
+            font-size: 0.95rem;
+        }
+        
+        .api-endpoint {
+            padding: 1.5rem;
+        }
+        
+        .endpoint-url {
+            font-size: 0.95rem;
+            word-break: break-all;
+        }
+        
+        .param-table {
+            font-size: 0.9rem;
+        }
+        
+        .param-table th, .param-table td {
+            padding: 8px 10px;
+            min-width: 100px;
+        }
+        
+        .code-example pre {
+            padding: 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .error-code-card {
+            flex-direction: column;
+        }
+        
+        .error-code {
+            width: 100%;
+            min-height: 80px;
+            font-size: 2rem;
+        }
+        
+        .menu-data {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            height: 100vh;
+            background-color: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 80px;
+            transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 999;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .menu-data.active {
+            right: 0;
+            display: flex;
+        }
+        
+        .menu-data a {
+            display: block;
+            margin: 15px 25px;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            color: #fff;
+            text-decoration: none;
+        }
+        
+        .menu-data a:hover, .menu-data a:active {
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        }
+    </style>
+
+    
+    <style>
+        /* Стили для карточек API ключей */
+        .api-types {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .api-type-card {
+            background-color: rgba(22, 22, 22, 0.7);
+            border-radius: 12px;
+            padding: 1.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .api-type-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .api-type-card p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 1.2rem;
+            line-height: 1.5;
+        }
+        
+        .api-type-card ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin-bottom: 1.5rem;
+        }
+        
+        .api-type-card li {
+            position: relative;
+            padding-left: 1.8rem;
+            margin-bottom: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .api-type-card li::before {
+            content: "•";
+            position: absolute;
+            left: 0.5rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .api-type-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background-color: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .api-type-btn:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .api-type-btn i {
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .api-types {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="navbar" id="navbar">
+<div class="refind">
+<a href="/index.html">
+<img alt="ReFind" class="ref" src="/assets/img/wpeA3eVCpHOxX3g6xC.png" style="object-fit: contain; max-width: 100%; height: 60px;" />
+</a>
+</div>
+<div class="desktop-menu">
+<a href="/index.html" class="nav-button">Главная</a>
+<a href="/news.html" class="nav-button">Новости</a>
+<a href="/api.html" class="nav-button active">API</a>
+<a href="/search.html" class="nav-button">Поиск</a>
+</div>
+<div id="Menu-bar">
+<i class="fas fa-bars size-icon"></i>
+</div>
+</div>
+<div class="menu-data">
+<a href="/index.html">Главная</a>
+<a href="/news.html">Новости</a>
+<a href="/api.html">API</a>
+<a href="/search.html">Поиск</a>
+</div>
+<div class="hero-section">
+    <div class="api-container">
+        <div class="api-intro">
+            <h1 class="api-title">ReFind API Documentation</h1>
+            <p class="api-subtitle">Документация по использованию API сервиса ReFind для поиска по базам данных утечек</p>
+        </div>
+        
+        <div class="api-section">
+            <h2 class="api-section-title">🔍 О сервисе</h2>
+            <p class="section-content">
+                ReFind API - это сервис для поиска данных по утечкам. API предоставляет возможность поиска информации по телефонным номерам в различных базах данных.
+            </p>
+        </div>
+        
+        <div class="api-section">
+            <h2 class="api-section-title">💰 Тарифы</h2>
+            <div class="pricing-cards">
+                <div class="pricing-card">
+                    <h3>Запросы по API</h3>
+                    <ul>
+                        <li><span class="price-item">Базовый поиск по номеру:</span> <span class="price">0.02$</span></li>
+                        <li><span class="price-item">Поиск с нейроанализом:</span> <span class="price">0.15$</span></li>
+                        <li><span class="price-item">Email поиск:</span> <span class="price">0.03$</span> <span class="price-tag">в разработке</span></li>
+                    </ul>
+                </div>
+                <div class="pricing-card">
+                    <h3>Безлимитные ключи</h3>
+                    <ul>
+                        <li><span class="price-item">Безлимитный ключ (100 запр/мин):</span> <span class="price">200$</span></li>
+                        <li><span class="price-item">Безлимитный ключ без нейро (500 запр/мин):</span> <span class="price">90$</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="api-section">
+            <h2 class="api-section-title">🛠 Технические детали</h2>
+            
+            <div class="api-subsection">
+                <h3 class="subsection-title">🔗 Базовый URL</h3>
+                <div class="code-example">
+                    <div class="code-example-header">
+                        <div class="code-example-title">Базовый URL</div>
+                        <div class="code-example-actions">
+                            <div class="code-example-action code-action-red"></div>
+                            <div class="code-example-action code-action-yellow"></div>
+                            <div class="code-example-action code-action-green"></div>
+                        </div>
+                    </div>
+                    <pre><span class="code-method">[СКРЫТ]</span></pre>
+                </div>
+                <p class="note">Для получения доступа к API обратитесь к администратору через Telegram бота @ReFindOsintBot</p>
+            </div>
+            
+            <div class="api-subsection">
+                <h3 class="subsection-title">📍 Эндпоинты</h3>
+                
+                <div class="api-endpoint" style="--i: 1">
+                    <span class="endpoint-method method-get">GET</span>
+                    <span class="endpoint-url">/search</span>
+                    <p class="endpoint-description">Поиск информации по номеру телефона в базах данных утечек</p>
+                    
+                    <div class="endpoint-params">
+                        <h4 class="param-title">Параметры запроса</h4>
+                        <div class="param-table-container">
+                            <table class="param-table">
+                                <thead>
+                                    <tr>
+                                        <th>Параметр</th>
+                                        <th>Тип</th>
+                                        <th>Статус</th>
+                                        <th>Описание</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>phone</td>
+                                        <td>string</td>
+                                        <td><span class="param-required">Обязательный</span></td>
+                                        <td>Номер телефона в формате 79XXXXXXXXX</td>
+                                    </tr>
+                                    <tr>
+                                        <td>api_key</td>
+                                        <td>string</td>
+                                        <td><span class="param-required">Обязательный</span></td>
+                                        <td>Ваш API-ключ доступа</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="api-endpoint" style="--i: 2">
+                    <span class="endpoint-method method-get">GET</span>
+                    <span class="endpoint-url">/databases</span>
+                    <p class="endpoint-description">Получение списка доступных баз данных</p>
+                    
+                    <div class="endpoint-params">
+                        <h4 class="param-title">Примечание</h4>
+                        <p>Этот эндпоинт не требует API-ключа для доступа</p>
+                    </div>
+                    
+                    <div class="code-example">
+                        <div class="code-example-header">
+                            <div class="code-example-title">Пример запроса</div>
+                            <div class="code-example-actions">
+                                <div class="code-example-action code-action-red"></div>
+                                <div class="code-example-action code-action-yellow"></div>
+                                <div class="code-example-action code-action-green"></div>
+                            </div>
+                        </div>
+                        <pre><span class="code-line"><span class="code-method">curl</span> https://СКРЫТ/databases</span></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="api-subsection">
+                <h3 class="subsection-title">📊 Коды ответов</h3>
+                <div class="param-table-container">
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Код</th>
+                                <th>Статус</th>
+                                <th>Описание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>200</td>
+                                <td>OK</td>
+                                <td>Запрос успешно выполнен</td>
+                            </tr>
+                            <tr>
+                                <td>401</td>
+                                <td>Unauthorized</td>
+                                <td>Неверный API ключ</td>
+                            </tr>
+                            <tr>
+                                <td>403</td>
+                                <td>Forbidden</td>
+                                <td>Закончился лимит ключа</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="api-subsection">
+                <h3 class="subsection-title">🔑 Типы API-ключей</h3>
+                <div class="param-table-container">
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Тип</th>
+                                <th>Описание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>infinite</td>
+                                <td>Ключ без ограничений</td>
+                            </tr>
+                            <tr>
+                                <td>requests</td>
+                                <td>Ключ с лимитом по запросам</td>
+                            </tr>
+                            <tr>
+                                <td>both</td>
+                                <td>Ключ с лимитом запросов + нейроанализ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="api-section">
+            <h2 class="api-section-title">⚠️ Важно</h2>
+            <div class="important-notes">
+                <div class="important-note">
+                    <div class="note-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="note-content">
+                        <h4>Формат номера</h4>
+                        <p>Формат номера строго 79XXXXXXXXX (11 цифр, начинается с 7)</p>
+                    </div>
+                </div>
+                <div class="important-note">
+                    <div class="note-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="note-content">
+                        <h4>Лимиты ключей</h4>
+                        <p>При превышении лимита ключ блокируется</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="api-section" id="basic-info-section">
+<h2 class="api-section-title">Основная информация</h2>
+    <p class="section-description">
+        ReFind API предоставляет доступ к базе данных утечек для поиска информации по номерам телефонов.
+        Ниже приведены основные сведения о работе с API и ключевые эндпоинты.
+    </p>
+    
+    <div class="info-grid">
+        <div class="info-card basic-info">
+            <div class="info-card-icon">
+                <i class="fas fa-server"></i>
+    </div>
+            <div class="info-card-content">
+                <h4>Базовый URL API</h4>
+                <p>Все запросы к API должны отправляться на базовый URL:</p>
+                <div class="api-url-box">
+                    <code class="secured-url">[Скрыт]</code>
+                    <span class="security-note">
+                        <i class="fas fa-lock"></i> Полный URL скрыт в целях безопасности
+                    </span>
+    </div>
+</div>
+</div>
+
+        <div class="info-card auth-info">
+            <div class="info-card-icon">
+                <i class="fas fa-key"></i>
+            </div>
+            <div class="info-card-content">
+                <h4>Аутентификация</h4>
+                <p>Для доступа к API необходимо использовать API ключ, который передается в заголовке <code>X-API-Key</code>:</p>
+<div class="code-example">
+                    <div class="code-example-header">
+                        <span class="code-example-title">Пример аутентификации</span>
+                        <div class="code-example-actions">
+                            <span class="code-example-action code-action-red"></span>
+                            <span class="code-example-action code-action-yellow"></span>
+                            <span class="code-example-action code-action-green"></span>
+                        </div>
+                    </div>
+                    <pre><span class="code-line"><span class="code-method">curl</span> -X GET <span class="code-string">"[API URL]/search?phone=79991234567"</span> \</span>
+<span class="code-line">     -H <span class="code-string">"X-API-Key: ваш_api_ключ"</span></span></pre>
+</div>
+</div>
+</div>
+
+        <div class="info-card format-info">
+            <div class="info-card-icon">
+                <i class="fas fa-phone-alt"></i>
+</div>
+            <div class="info-card-content">
+                <h4>Формат номера телефона</h4>
+                <p>API поддерживает поиск только по российским номерам телефонов в следующих форматах:</p>
+                <ul class="format-list">
+                    <li><code>7XXXXXXXXXX</code> — 11 цифр, начиная с 7</li>
+                    <li><code>89XXXXXXXX</code> — 10 цифр, начиная с 9 (автоматически преобразуется в формат с 7)</li>
+                </ul>
+                <p>Примеры корректных номеров: <code>79991234567</code>, <code>89991234567</code></p>
+            </div>
+        </div>
+        
+        <div class="info-card limits-info">
+            <div class="info-card-icon">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <div class="info-card-content">
+                <h4>Лимиты запросов</h4>
+                <p>Количество запросов зависит от типа вашего API ключа:</p>
+                <ul class="limits-list">
+                    <li><strong>Infinite</strong>: Без ограничений</li>
+                    <li><strong>Requests</strong>: Лимит запросов от 50 до 1000 в зависимости от тарифа</li>
+                    <li><strong>Both</strong>: Ограниченное количество запросов</li>
+                </ul>
+            </div>
+</div>
+</div>
+</div>
+
+<style>
+    /* Стили для базовой информации */
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .info-card {
+        background-color: rgba(22, 22, 22, 0.7);
+        border-radius: 12px;
+        padding: 1.8rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .info-card-icon {
+        background-color: rgba(160, 160, 160, 0.15);
+        color: #e0e0e0;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .info-card-content {
+        flex-grow: 1;
+    }
+    
+    .info-card-content h4 {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+        font-size: 1.2rem;
+        color: #fff;
+    }
+    
+    .info-card-content p {
+        margin: 0 0 1rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .api-url-box {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 12px;
+        margin: 10px 0;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .api-url-box code {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.5);
+        display: block;
+        padding: 0;
+        text-align: center;
+    }
+    
+    .secured-url {
+        position: relative;
+    }
+    
+    .security-note {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-align: center;
+        width: 100%;
+    }
+    
+    .security-note i {
+        margin-right: 5px;
+        color: #a0a0a0;
+    }
+    
+    /* Улучшенные стили для примеров ответов API */
+    .api-response-container {
+        background-color: rgba(22, 22, 22, 0.7);
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+    
+    .api-response-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background-color: rgba(30, 30, 30, 0.6);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .api-response-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .api-response-icon {
+        color: #a0a0a0;
+        font-size: 0.9rem;
+    }
+    
+    .api-response-status {
+        font-size: 0.8rem;
+        padding: 3px 8px;
+        border-radius: 4px;
+        background-color: rgba(160, 160, 160, 0.1);
+        color: #e0e0e0;
+    }
+    
+    .api-response-body {
+        padding: 16px;
+    }
+    
+    /* Стили для вкладок в примерах ответов */
+    .response-tabs {
+        display: flex;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .response-tab {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 2px solid transparent;
+    }
+    
+    .response-tab.active {
+        color: #fff;
+        border-bottom-color: #a0a0a0;
+        background-color: rgba(255, 255, 255, 0.03);
+            }
+            
+    .response-tab-content {
+        display: none;
+            }
+            
+    .response-tab-content.active {
+                display: block;
+    }
+    
+    /* Стили для форматированного вида ответа */
+    .formatted-response {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .response-item {
+        background-color: rgba(30, 30, 30, 0.5);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .response-item:hover {
+        transform: translateY(-3px);
+    }
+    
+    .response-item-header {
+        padding: 12px 16px;
+        background-color: rgba(30, 30, 30, 0.8);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .response-item-title {
+        font-weight: 600;
+                font-size: 0.95rem;
+            }
+            
+    .response-item-badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .response-item-body {
+        padding: 16px;
+    }
+    
+    .response-field {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: baseline;
+    }
+    
+    .response-field:last-child {
+        margin-bottom: 0;
+    }
+    
+    .response-field span {
+        min-width: 120px;
+        color: rgba(255, 255, 255, 0.6);
+                font-size: 0.9rem;
+    }
+    
+    .response-field strong {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+    }
+    
+    .tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background-color: rgba(160, 160, 160, 0.1);
+        color: #e0e0e0;
+        font-size: 0.85rem;
+        margin-right: 5px;
+    }
+    
+    .param-highlight {
+        color: #e0e0e0;
+        font-style: italic;
+    }
+    
+    /* Стили для раздела типов API ключей */
+    .section-description {
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 2rem;
+        max-width: 800px;
+        line-height: 1.6;
+    }
+    
+    /* Стили для раздела кодов ошибок */
+    .error-codes-container {
+            display: grid;
+        grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+    .error-code-card {
+        display: flex;
+        background-color: rgba(22, 22, 22, 0.7);
+            border-radius: 12px;
+        overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .error-code-card:hover {
+            transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .error-code {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 100px;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.15);
+        background-color: rgba(20, 20, 20, 0.8);
+        padding: 1.5rem;
+        letter-spacing: -1px;
+    }
+    
+    .error-details {
+        padding: 1.5rem;
+        flex-grow: 1;
+    }
+    
+    .error-details h4 {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .error-details p {
+        margin: 0 0 1rem 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    .error-example {
+            margin-top: 1rem;
+        }
+        
+    .error-example .code-example {
+        margin: 0;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+    
+    /* Кнопка "Наверх" */
+    .scroll-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        background-color: rgba(25, 25, 25, 0.8);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 99;
+        opacity: 0;
+        visibility: hidden;
+            transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .scroll-to-top.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .scroll-to-top:hover {
+        transform: translateY(-5px);
+        background-color: rgba(30, 30, 30, 0.9);
+    }
+    
+    /* Улучшенные стили для мобильной версии */
+    @media (max-width: 768px) {
+        .desktop-menu {
+            display: none;
+        }
+        
+        #Menu-bar {
+            display: block;
+        }
+        
+        .api-container {
+            padding: 1.5rem 1rem;
+            width: 95%;
+        }
+        
+        .api-title {
+            font-size: 1.8rem;
+        }
+        
+        .api-subtitle {
+            font-size: 0.95rem;
+        }
+        
+        .api-endpoint {
+            padding: 1.5rem;
+        }
+        
+        .endpoint-url {
+            font-size: 0.95rem;
+            word-break: break-all;
+        }
+        
+        .param-table {
+            font-size: 0.9rem;
+        }
+        
+        .param-table th, .param-table td {
+            padding: 8px 10px;
+            min-width: 100px;
+        }
+        
+        .code-example pre {
+            padding: 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .error-code-card {
+            flex-direction: column;
+        }
+        
+        .error-code {
+            width: 100%;
+            min-height: 80px;
+            font-size: 2rem;
+        }
+        
+        .menu-data {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            height: 100vh;
+            background-color: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 80px;
+            transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 999;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .menu-data.active {
+            right: 0;
+            display: flex;
+        }
+        
+        .menu-data a {
+            display: block;
+            margin: 15px 25px;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            color: #fff;
+            text-decoration: none;
+        }
+        
+        .menu-data a:hover, .menu-data a:active {
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        }
+</style>
+
+<div class="api-section" id="search-section">
+    <h2 class="api-section-title">Поиск по номеру телефона</h2>
+    <div class="api-endpoint" style="--i: 3">
+<span class="endpoint-method method-get">GET</span>
+        <span class="endpoint-url">/search?phone=<span class="param-highlight">номер_телефона</span></span>
+        <p class="endpoint-description">Поиск информации по номеру телефона в базах данных утечек.</p>
+
+<div class="endpoint-params">
+            <h3 class="param-title">Параметры запроса</h3>
+            <div class="param-table">
+                <table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Тип</th>
+<th>Обязательный</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>phone</td>
+<td>string</td>
+<td><span class="param-required">Да</span></td>
+                            <td>Номер телефона в формате 7XXXXXXXXXX (только цифры, без символов)</td>
+</tr>
+<tr>
+                            <td>full</td>
+<td>boolean</td>
+<td><span class="param-optional">Нет</span></td>
+                            <td>Если true, возвращает полную информацию без маскирования данных (только для ключей с расширенным доступом)</td>
+</tr>
+</tbody>
+</table>
+            </div>
+</div>
+
+        
+<div class="code-example">
+            <div class="code-example-header">
+                <span class="code-example-title">Пример запроса</span>
+                <div class="code-example-actions">
+                    <span class="code-example-action code-action-red"></span>
+                    <span class="code-example-action code-action-yellow"></span>
+                    <span class="code-example-action code-action-green"></span>
+                </div>
+            </div>
+            <pre><span class="code-line"><span class="code-method">curl</span> -X GET <span class="code-string">"[API URL]/search?phone=79991234567"</span> \</span>
+<span class="code-line">     -H <span class="code-string">"X-API-Key: ваш_api_ключ"</span></span></pre>
+</div>
+
+        
+<div class="response-example">
+            <h3 class="param-title">Пример ответа</h3>
+            
+            <div class="api-response-container">
+                <div class="api-response-header">
+                    <div class="api-response-title">
+                        <i class="fas fa-check-circle api-response-icon"></i>
+                        Успешный ответ
+</div>
+                    <span class="api-response-status">200 OK</span>
+</div>
+                
+                
+                <div class="response-tabs">
+                    <div class="response-tab active" data-tab="json">JSON</div>
+                    <div class="response-tab" data-tab="formatted">Визуальный</div>
+</div>
+
+                <div class="api-response-body">
+                    
+                    <div class="response-tab-content active" id="json-tab">
+<div class="code-example">
+                            <pre><span class="code-line">{</span>
+<span class="code-line">  <span class="code-key">"status"</span>: <span class="code-string">"success"</span>,</span>
+<span class="code-line">  <span class="code-key">"phone"</span>: <span class="code-string">"79991234567"</span>,</span>
+<span class="code-line">  <span class="code-key">"found"</span>: <span class="code-boolean">true</span>,</span>
+<span class="code-line">  <span class="code-key">"databases"</span>: <span class="code-number">3</span>,</span>
+<span class="code-line">  <span class="code-key">"time"</span>: <span class="code-string">"0.24 сек"</span>,</span>
+<span class="code-line">  <span class="code-key">"results"</span>: [</span>
+<span class="code-line">    {</span>
+<span class="code-line">      <span class="code-key">"database"</span>: <span class="code-string">"VK 2019"</span>,</span>
+<span class="code-line">      <span class="code-key">"source"</span>: <span class="code-string">"Утечка данных ВКонтакте 2019"</span>,</span>
+<span class="code-line">      <span class="code-key">"data"</span>: {</span>
+<span class="code-line">        <span class="code-key">"name"</span>: <span class="code-string">"Иван"</span>,</span>
+<span class="code-line">        <span class="code-key">"surname"</span>: <span class="code-string">"Ива***"</span>,</span>
+<span class="code-line">        <span class="code-key">"email"</span>: <span class="code-string">"iva***@***il.com"</span>,</span>
+<span class="code-line">        <span class="code-key">"vk_id"</span>: <span class="code-string">"id****234"</span>,</span>
+<span class="code-line">        <span class="code-key">"city"</span>: <span class="code-string">"Москва"</span></span>
+<span class="code-line">      }</span>
+<span class="code-line">    },</span>
+<span class="code-line">    {</span>
+<span class="code-line">      <span class="code-key">"database"</span>: <span class="code-string">"GetContact 2020"</span>,</span>
+<span class="code-line">      <span class="code-key">"source"</span>: <span class="code-string">"Утечка данных GetContact 2020"</span>,</span>
+<span class="code-line">      <span class="code-key">"data"</span>: {</span>
+<span class="code-line">        <span class="code-key">"name"</span>: <span class="code-string">"Иван Иванов"</span>,</span>
+<span class="code-line">        <span class="code-key">"tags"</span>: [<span class="code-string">"Коллега"</span>, <span class="code-string">"Работа"</span>]</span>
+<span class="code-line">      }</span>
+<span class="code-line">    },</span>
+<span class="code-line">    {</span>
+<span class="code-line">      <span class="code-key">"database"</span>: <span class="code-string">"Delivery Club 2022"</span>,</span>
+<span class="code-line">      <span class="code-key">"source"</span>: <span class="code-string">"Утечка данных Delivery Club 2022"</span>,</span>
+<span class="code-line">      <span class="code-key">"data"</span>: {</span>
+<span class="code-line">        <span class="code-key">"name"</span>: <span class="code-string">"Иван"</span>,</span>
+<span class="code-line">        <span class="code-key">"email"</span>: <span class="code-string">"iva***@***il.com"</span>,</span>
+<span class="code-line">        <span class="code-key">"address"</span>: <span class="code-string">"ул. Ле******, д. **"</span>,</span>
+<span class="code-line">        <span class="code-key">"orders"</span>: <span class="code-number">12</span></span>
+<span class="code-line">      }</span>
+<span class="code-line">    }</span>
+<span class="code-line">  ],</span>
+<span class="code-line">  <span class="code-key">"remaining_requests"</span>: <span class="code-number">42</span></span>
+<span class="code-line">}</span></pre>
+                        </div>
+</div>
+
+                    
+                    <div class="response-tab-content" id="formatted-tab">
+                        <div class="formatted-response">
+                            <div class="response-item">
+                                <div class="response-item-header">
+                                    <div class="response-item-title">Общая информация</div>
+</div>
+                                <div class="response-item-body">
+                                    <div class="response-field"><span>Телефон:</span> <strong>79991234567</strong></div>
+                                    <div class="response-field"><span>Найдено в базах:</span> <strong>3</strong></div>
+                                    <div class="response-field"><span>Время поиска:</span> <strong>0.24 сек</strong></div>
+                                    <div class="response-field"><span>Осталось запросов:</span> <strong>42</strong></div>
+</div>
+</div>
+
+                            <div class="response-item">
+                                <div class="response-item-header">
+                                    <div class="response-item-title">Источник: VK 2019</div>
+                                    <div class="response-item-badge">Социальная сеть</div>
+                                </div>
+                                <div class="response-item-body">
+                                    <div class="response-field"><span>Имя:</span> <strong>Иван</strong></div>
+                                    <div class="response-field"><span>Фамилия:</span> <strong>Ива***</strong></div>
+                                    <div class="response-field"><span>Email:</span> <strong>iva***@***il.com</strong></div>
+                                    <div class="response-field"><span>VK ID:</span> <strong>id****234</strong></div>
+                                    <div class="response-field"><span>Город:</span> <strong>Москва</strong></div>
+                                </div>
+                            </div>
+                            
+                            <div class="response-item">
+                                <div class="response-item-header">
+                                    <div class="response-item-title">Источник: GetContact 2020</div>
+                                    <div class="response-item-badge">Справочник</div>
+                                </div>
+                                <div class="response-item-body">
+                                    <div class="response-field"><span>Имя:</span> <strong>Иван Иванов</strong></div>
+                                    <div class="response-field"><span>Теги:</span> <span class="tag">Коллега</span> <span class="tag">Работа</span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="response-item">
+                                <div class="response-item-header">
+                                    <div class="response-item-title">Источник: Delivery Club 2022</div>
+                                    <div class="response-item-badge">Доставка еды</div>
+                                </div>
+                                <div class="response-item-body">
+                                    <div class="response-field"><span>Имя:</span> <strong>Иван</strong></div>
+                                    <div class="response-field"><span>Email:</span> <strong>iva***@***il.com</strong></div>
+                                    <div class="response-field"><span>Адрес:</span> <strong>ул. Ле******, д. **</strong></div>
+                                    <div class="response-field"><span>Заказов:</span> <strong>12</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="api-response-container" style="margin-top: 20px;">
+            <div class="api-response-header">
+                <div class="api-response-title">
+                    <i class="fas fa-info-circle" style="color: #a0a0a0;"></i>
+                    Ответ, если данные не найдены
+                </div>
+                <span class="api-response-status">200 OK</span>
+            </div>
+            <div class="api-response-body">
+<div class="code-example">
+                    <pre><span class="code-line">{</span>
+<span class="code-line">  <span class="code-key">"status"</span>: <span class="code-string">"success"</span>,</span>
+<span class="code-line">  <span class="code-key">"phone"</span>: <span class="code-string">"79991234567"</span>,</span>
+<span class="code-line">  <span class="code-key">"found"</span>: <span class="code-boolean">false</span>,</span>
+<span class="code-line">  <span class="code-key">"databases"</span>: <span class="code-number">0</span>,</span>
+<span class="code-line">  <span class="code-key">"time"</span>: <span class="code-string">"0.18 сек"</span>,</span>
+<span class="code-line">  <span class="code-key">"results"</span>: [],</span>
+<span class="code-line">  <span class="code-key">"remaining_requests"</span>: <span class="code-number">41</span></span>
+<span class="code-line">}</span></pre>
+                </div>
+            </div>
+</div>
+
+        
+        <div class="api-response-container" style="margin-top: 20px;">
+            <div class="api-response-header">
+                <div class="api-response-title">
+                    <i class="fas fa-exclamation-circle" style="color: #a0a0a0;"></i>
+                    Ответ с ошибкой
+                </div>
+                <span class="api-response-status">400 Bad Request</span>
+            </div>
+            <div class="api-response-body">
+<div class="code-example">
+                    <pre><span class="code-line">{</span>
+<span class="code-line">  <span class="code-key">"status"</span>: <span class="code-string">"error"</span>,</span>
+<span class="code-line">  <span class="code-key">"code"</span>: <span class="code-number">400</span>,</span>
+<span class="code-line">  <span class="code-key">"message"</span>: <span class="code-string">"Неверный формат номера телефона. Используйте формат 7XXXXXXXXXX"</span></span>
+<span class="code-line">}</span></pre>
+                </div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="api-section" id="api-keys-section">
+<h2 class="api-section-title">Типы API ключей</h2>
+    <p class="section-description">
+        ReFind API предлагает несколько типов ключей с различными возможностями и ограничениями. 
+        Выберите наиболее подходящий для ваших задач.
+    </p>
+    
+    <div class="api-types">
+        <div class="api-type-card">
+            <h3>Infinite</h3>
+            <p>Неограниченный доступ к API с полным набором функций.</p>
+            <ul>
+                <li>Неограниченное количество запросов</li>
+                <li>Доступ ко всем базам данных</li>
+                <li>Полный набор функций анализа</li>
+                <li>Приоритетная поддержка</li>
+                <li>Возможность интеграции с внешними сервисами</li>
+</ul>
+            <a href="https://t.me/ReFindOsintBot" class="api-type-btn" target="_blank">
+                <i class="fab fa-telegram"></i> Получить ключ
+            </a>
+</div>
+
+        <div class="api-type-card" style="--i: 2">
+<h3>Requests</h3>
+            <p>Ограниченное количество запросов с доступом ко всем базам.</p>
+<ul>
+                <li>Лимит на количество запросов</li>
+<li>Доступ ко всем базам данных</li>
+                <li>Ограниченный набор функций анализа</li>
+                <li>Стандартная поддержка</li>
+                <li>Базовые возможности интеграции</li>
+</ul>
+            <a href="https://t.me/ReFindOsintBot" class="api-type-btn" target="_blank">
+                <i class="fab fa-telegram"></i> Получить ключ
+            </a>
+</div>
+
+        <div class="api-type-card" style="--i: 3">
+<h3>Both</h3>
+            <p>Ограниченный доступ к определенным базам данных.</p>
+            <ul>
+                <li>Лимит на количество запросов</li>
+                <li>Доступ к ограниченному набору баз</li>
+                <li>Ограниченный набор функций анализа</li>
+                <li>Базовая поддержка</li>
+                <li>Без возможности интеграции</li>
+</ul>
+            <a href="https://t.me/ReFindOsintBot" class="api-type-btn" target="_blank">
+                <i class="fab fa-telegram"></i> Получить ключ
+            </a>
+</div>
+</div>
+
+    <div class="api-key-notes">
+        <div class="info-card">
+            <div class="info-card-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="info-card-content">
+                <h4>Важно: Лимиты и ограничения</h4>
+                <p>Превышение лимита запросов автоматически блокирует ключ. Для возобновления доступа обратитесь в поддержку через Telegram бота.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="api-section" id="errors-section">
+<h2 class="api-section-title">Коды ошибок</h2>
+    <p class="section-description">
+        При работе с API могут возникать различные ошибки. Ниже приведен список кодов ошибок и их описание.
+    </p>
+    
+    <div class="error-codes-container">
+        <div class="error-code-card">
+            <div class="error-code">400</div>
+            <div class="error-details">
+                <h4>Bad Request</h4>
+                <p>Неверный формат запроса. Проверьте параметры и формат данных.</p>
+                <div class="error-example">
+                    <div class="code-example">
+                        <pre><span class="code-line">{</span>
+<span class="code-line">  <span class="code-key">"status"</span>: <span class="code-string">"error"</span>,</span>
+<span class="code-line">  <span class="code-key">"code"</span>: <span class="code-number">400</span>,</span>
+<span class="code-line">  <span class="code-key">"message"</span>: <span class="code-string">"Неверный формат номера телефона"</span></span>
+<span class="code-line">}</span></pre>
+                    </div>
+                </div>
+</div>
+</div>
+
+        <div class="error-code-card">
+            <div class="error-code">401</div>
+            <div class="error-details">
+                <h4>Unauthorized</h4>
+                <p>Недействительный или просроченный API ключ. Проверьте ключ или получите новый.</p>
+                <div class="error-example">
+                    <div class="code-example">
+                        <pre><span class="code-line">{</span>
+<span class="code-line">  <span class="code-key">"status"</span>: <span class="code-string">"error"</span>,</span>
+<span class="code-line">  <span class="code-key">"code"</span>: <span class="code-number">401</span>,</span>
+<span class="code-line">  <span class="code-key">"message"</span>: <span class="code-string">"Недействительный API ключ"</span></span>
+<span class="code-line">}</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="error-code-card">
+            <div class="error-code">403</div>
+            <div class="error-details">
+                <h4>Forbidden</h4>
+                <p>Недостаточно прав для выполнения запроса или превышен лимит запросов.</p>
+                <div class="error-example">
+                    <div class="code-example">
+                        <pre><span class="code-line">{</span>
+<span class="code-line">  <span class="code-key">"status"</span>: <span class="code-string">"error"</span>,</span>
+<span class="code-line">  <span class="code-key">"code"</span>: <span class="code-number">403</span>,</span>
+<span class="code-line">  <span class="code-key">"message"</span>: <span class="code-string">"Превышен лимит запросов"</span></span>
+<span class="code-line">}</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="error-code-card">
+            <div class="error-code">429</div>
+            <div class="error-details">
+                <h4>Too Many Requests</h4>
+                <p>Слишком много запросов за короткий промежуток времени. Повторите попытку позже.</p>
+                <div class="error-example">
+                    <div class="code-example">
+                        <pre><span class="code-line">{</span>
+<span class="code-line">  <span class="code-key">"status"</span>: <span class="code-string">"error"</span>,</span>
+<span class="code-line">  <span class="code-key">"code"</span>: <span class="code-number">429</span>,</span>
+<span class="code-line">  <span class="code-key">"message"</span>: <span class="code-string">"Слишком много запросов"</span>,</span>
+<span class="code-line">  <span class="code-key">"retry_after"</span>: <span class="code-number">60</span></span>
+<span class="code-line">}</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="error-code-card">
+            <div class="error-code">500</div>
+            <div class="error-details">
+                <h4>Internal Server Error</h4>
+                <p>Внутренняя ошибка сервера. Повторите попытку позже или обратитесь в поддержку.</p>
+                <div class="error-example">
+                    <div class="code-example">
+                        <pre><span class="code-line">{</span>
+<span class="code-line">  <span class="code-key">"status"</span>: <span class="code-string">"error"</span>,</span>
+<span class="code-line">  <span class="code-key">"code"</span>: <span class="code-number">500</span>,</span>
+<span class="code-line">  <span class="code-key">"message"</span>: <span class="code-string">"Внутренняя ошибка сервера"</span></span>
+<span class="code-line">}</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Отложенная загрузка изображений
+    document.addEventListener('DOMContentLoaded', function() {
+        const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+        
+        if ('loading' in HTMLImageElement.prototype) {
+            // Браузер поддерживает атрибут loading="lazy"
+            lazyImages.forEach(img => {
+                img.src = img.dataset.src;
+            });
+        } else {
+            // Резервный вариант для браузеров, не поддерживающих lazy loading
+            const lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        const lazyImage = entry.target;
+                        lazyImage.src = lazyImage.dataset.src;
+                        lazyImageObserver.unobserve(lazyImage);
+                    }
+                });
+            });
+            
+            lazyImages.forEach(function(lazyImage) {
+                lazyImageObserver.observe(lazyImage);
+            });
+        }
+    });
+
+    // Оптимизация анимаций
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    if (reducedMotion) {
+        document.documentElement.style.setProperty('--animation-duration', '0.1s');
+        document.documentElement.style.setProperty('--transition-duration', '0.1s');
+    } else {
+        document.documentElement.style.setProperty('--animation-duration', '0.5s');
+        document.documentElement.style.setProperty('--transition-duration', '0.3s');
+    }
+    
+    // Эффект скроллинга для навигационной панели
+    let lastScrollTop = 0;
+    const navbar = document.getElementById('navbar');
+    
+    function throttle(func, limit) {
+        let lastCall = 0;
+        return function() {
+            const now = Date.now();
+            if (now - lastCall >= limit) {
+                lastCall = now;
+                func.apply(this, arguments);
+            }
+        };
+    }
+    
+    const handleScroll = throttle(function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > 10) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+        
+        lastScrollTop = scrollTop;
+    }, 100); // Выполняем не чаще чем раз в 100 мс
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    // Оптимизированная работа мобильного меню
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация кнопки прокрутки наверх
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+        if (scrollToTopBtn) {
+            // Показывать кнопку только при прокрутке вниз
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    scrollToTopBtn.classList.add('visible');
+                } else {
+                    scrollToTopBtn.classList.remove('visible');
+                }
+            });
+            
+            // Обработчик клика для прокрутки наверх
+            scrollToTopBtn.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+        
+        // Улучшенная работа мобильного меню
+        const menuBar = document.getElementById('Menu-bar');
+        const menuData = document.querySelector('.menu-data');
+        
+        if (menuBar) {
+            menuBar.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Переключаем класс active для меню и кнопки
+                menuData.classList.toggle('active');
+                menuBar.classList.toggle('active');
+                
+                // Блокируем/разблокируем прокрутку страницы
+                if (menuData.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Тактильная обратная связь
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(50);
+                    }
+                } else {
+                    document.body.style.overflow = '';
+                    
+                    // Тактильная обратная связь при закрытии
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(30);
+                    }
+                }
+            });
+        }
+        
+        // Закрытие меню при клике на ссылку с анимацией
+        const menuLinks = document.querySelectorAll('.menu-data a');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Добавляем эффект нажатия перед закрытием меню
+                this.classList.add('pressed');
+                
+                // После небольшой задержки для эффекта закрываем меню
+                setTimeout(() => {
+                menuData.classList.remove('active');
+                    menuBar.classList.remove('active');
+                    document.body.style.overflow = '';
+                    this.classList.remove('pressed');
+                }, 150);
+                
+                // Вибрация при выборе пункта меню
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([15, 10, 15]);
+                }
+        });
+    });
+    
+        // Закрытие меню при клике вне меню
+        document.addEventListener('click', function(e) {
+            if (menuData && menuData.classList.contains('active') && 
+                !menuData.contains(e.target) && 
+                e.target !== menuBar && 
+                !menuBar.contains(e.target)) {
+            menuData.classList.remove('active');
+                menuBar.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Установка классов активности для текущей страницы в меню
+        const currentPage = window.location.pathname;
+        menuLinks.forEach(link => {
+            const linkPath = link.getAttribute('href');
+            if (linkPath && currentPage.includes(linkPath) && linkPath !== '/') {
+                link.classList.add('active');
+            } else if (currentPage === '/' && linkPath === '/index.html') {
+                link.classList.add('active');
+            }
+        });
+        
+        // Добавляем индексы для анимации элементов
+        const apiEndpoints = document.querySelectorAll('.api-endpoint');
+        apiEndpoints.forEach((endpoint, index) => {
+            endpoint.style.setProperty('--i', index);
+        });
+        
+        // Улучшаем прокрутку для кода с добавлением индикатора
+        const codeExamples = document.querySelectorAll('.code-example pre');
+        codeExamples.forEach(code => {
+            // Проверяем, требуется ли горизонтальная прокрутка
+            if (code.scrollWidth > code.clientWidth) {
+                code.parentElement.classList.add('scrollable-block');
+            }
+            
+            // Добавляем индикатор горизонтальной прокрутки
+            code.addEventListener('scroll', function() {
+                if (this.scrollWidth > this.clientWidth) {
+                    if (this.scrollLeft > 0) {
+                        this.classList.add('scrolled');
+                    } else {
+                        this.classList.remove('scrolled');
+                    }
+                }
+            });
+        });
+        
+        // Улучшенная прокрутка к якорям с плавной анимацией
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    // Подсветка целевого элемента при прокрутке к нему
+                    target.classList.add('highlight-target');
+                    setTimeout(() => {
+                        target.classList.remove('highlight-target');
+                    }, 1500);
+                }
+            });
+        });
+        
+        // Регистрация сервис-воркера для поддержки оффлайн-режима
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+                    console.log('ServiceWorker registered: ', registration.scope);
+                }).catch(function(error) {
+                    console.log('ServiceWorker registration failed: ', error);
+                });
+            });
+        }
+    });
+
+    // Оптимизация отрисовки DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        // Отложенная загрузка неважных элементов
+        const deferredElements = document.querySelectorAll('[data-defer]');
+        
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const element = entry.target;
+                        if (element.dataset.src) {
+                            element.src = element.dataset.src;
+                            delete element.dataset.src;
+                        }
+                        if (element.dataset.srcset) {
+                            element.srcset = element.dataset.srcset;
+                            delete element.dataset.srcset;
+                        }
+                        if (element.dataset.background) {
+                            element.style.backgroundImage = `url(${element.dataset.background})`;
+                            delete element.dataset.background;
+                        }
+                        if (element.dataset.class) {
+                            element.classList.add(element.dataset.class);
+                            delete element.dataset.class;
+                        }
+                        observer.unobserve(element);
+                    }
+                });
+            }, {
+                rootMargin: '100px 0px' // Загружать элементы при приближении к ним на 100px
+            });
+            
+            deferredElements.forEach(element => {
+                observer.observe(element);
+            });
+        } else {
+            // Резервный вариант для старых браузеров
+            deferredElements.forEach(element => {
+                if (element.dataset.src) element.src = element.dataset.src;
+                if (element.dataset.srcset) element.srcset = element.dataset.srcset;
+                if (element.dataset.background) element.style.backgroundImage = `url(${element.dataset.background})`;
+                if (element.dataset.class) element.classList.add(element.dataset.class);
+            });
+        }
+        
+        // Оптимизация работы с DOM
+        // Группировка нескольких обновлений DOM в одно для предотвращения излишних перерисовок
+        function batchDOMUpdates(callback) {
+            requestAnimationFrame(() => {
+                const startTime = performance.now();
+                callback();
+                const endTime = performance.now();
+                console.log(`Batch DOM update took ${endTime - startTime}ms`);
+            });
+        }
+        
+        // Пример использования batchDOMUpdates для добавления элементов
+        function createAPIEndpoint(data) {
+            const endpoint = document.createElement('div');
+            endpoint.className = 'api-endpoint';
+            // ... заполнение содержимым ...
+            return endpoint;
+        }
+        
+        // Пример использования фрагмента для оптимизации вставки в DOM
+        function addAPIEndpoints(endpoints, container) {
+            batchDOMUpdates(() => {
+                const fragment = document.createDocumentFragment();
+                endpoints.forEach((endpointData, index) => {
+                    const endpoint = createAPIEndpoint(endpointData);
+                    endpoint.style.setProperty('--i', index);
+                    fragment.appendChild(endpoint);
+                });
+                container.appendChild(fragment);
+            });
+        }
+        
+        // Уменьшение работы основного потока
+        // Заменяем обработчики прокрутки для улучшения производительности
+        let ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                requestAnimationFrame(function() {
+                    const scrollPos = window.scrollY;
+                    // Обработка события прокрутки
+                    const navbar = document.getElementById('navbar');
+                    if (scrollPos > 10) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true }); // Используем пассивные слушатели событий для улучшения производительности
+        
+        // Экономия сетевого трафика
+        // Загрузка изображений в соответствующем разрешении
+        function loadAppropriateImage() {
+            const screenWidth = window.innerWidth;
+            const images = document.querySelectorAll('[data-srcset]');
+            
+            images.forEach(img => {
+                const srcset = img.dataset.srcset.split(',');
+                let bestSrc = '';
+                let bestWidth = 0;
+                
+                srcset.forEach(src => {
+                    const [url, width] = src.trim().split(' ');
+                    const numWidth = parseInt(width);
+                    
+                    if (numWidth >= screenWidth && (bestWidth === 0 || numWidth < bestWidth)) {
+                        bestWidth = numWidth;
+                        bestSrc = url;
+                    }
+                });
+                
+                if (bestSrc) {
+                    img.src = bestSrc;
+                } else if (srcset.length > 0) {
+                    const fallback = srcset[srcset.length - 1].trim().split(' ')[0];
+                    img.src = fallback;
+                }
+            });
+        }
+        
+        // Инициализация оптимизаций
+        loadAppropriateImage();
+        window.addEventListener('resize', throttle(loadAppropriateImage, 200), { passive: true });
+        
+        // Функция для ограничения частоты вызова
+        function throttle(func, limit) {
+            let lastCall = 0;
+            return function() {
+                const now = Date.now();
+                if (now - lastCall >= limit) {
+                    lastCall = now;
+                    func.apply(this, arguments);
+                }
+            };
+        }
+    });
+
+    // Сокращение времени обработки JavaScript
+    // Подгрузка необязательных скриптов только при необходимости
+    function loadScriptOnDemand(url, callback) {
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = callback || function() {};
+        document.head.appendChild(script);
+    }
+
+    // Пример: загрузка скрипта для синтаксической подсветки только при прокрутке до блока с кодом
+    function loadSyntaxHighlighter() {
+        const codeBlocks = document.querySelectorAll('.code-example');
+        if (codeBlocks.length === 0) return;
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    loadScriptOnDemand("/js/syntax-highlighter.js", function() {
+                        // Инициализация подсветки синтаксиса
+                        if (window.highlightCode) {
+                            window.highlightCode();
+                        }
+                    });
+                    observer.disconnect(); // Загружаем только один раз
+                }
+            });
+        });
+        
+        // Наблюдаем за первым блоком кода
+        observer.observe(codeBlocks[0]);
+    }
+
+    // Инициализация отложенной загрузки скриптов
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSyntaxHighlighter();
+    });
+</script>
+<script defer="True" src="/js/mobile-optimized.js"></script>
+<script defer src="/js/cloudshield.js"></script>
+
+<script>
+// Мобильное меню
+document.addEventListener('DOMContentLoaded', function() {
+    const menuBar = document.getElementById('Menu-bar');
+    const menuData = document.querySelector('.menu-data');
+    
+    if (menuBar && menuData) {
+        menuBar.addEventListener('click', function() {
+            menuData.classList.toggle('active');
+        });
+        
+        // Закрытие меню при клике на ссылку
+        const menuLinks = menuData.querySelectorAll('a');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                menuData.classList.remove('active');
+            });
+        });
+        
+        // Закрытие меню при клике вне его
+        document.addEventListener('click', function(event) {
+            if (!menuData.contains(event.target) && event.target !== menuBar) {
+                menuData.classList.remove('active');
+            }
+        });
+    }
+    
+    // Подсветка активного пункта меню
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.nav-button, .footer-links a');
+    
+    navLinks.forEach(link => {
+        const linkPath = link.getAttribute('href');
+        if (currentPath === linkPath || 
+            (currentPath.includes(linkPath) && linkPath !== '/')) {
+            link.classList.add('active');
+        }
+    });
+});
+</script>
+
+<script>
+// Обработчик для вкладок в примере ответа API
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработчик вкладок ответа API
+    const tabs = document.querySelectorAll('.response-tab');
+    if (tabs.length > 0) {
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabsContainer = this.closest('.response-tabs').parentElement;
+                
+                // Удаляем активное состояние у всех вкладок в текущем контейнере
+                tabsContainer.querySelectorAll('.response-tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Скрываем все контейнеры содержимого в текущем контейнере
+                tabsContainer.querySelectorAll('.response-tab-content').forEach(c => {
+                    c.classList.remove('active');
+                });
+                
+                // Добавляем активное состояние текущей вкладке
+                this.classList.add('active');
+                
+                // Определяем, какую вкладку показать
+                const tabName = this.getAttribute('data-tab');
+                tabsContainer.querySelector(`.response-tab-content#${tabName}-tab`).classList.add('active');
+            });
+        });
+    }
+    
+    // Добавляем кнопку "Наверх", если её нет
+    if (!document.getElementById('scrollToTop')) {
+        const scrollButton = document.createElement('div');
+        scrollButton.id = 'scrollToTop';
+        scrollButton.className = 'scroll-to-top';
+        scrollButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+        document.body.appendChild(scrollButton);
+        
+        // Показывать кнопку только при прокрутке вниз
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                scrollButton.classList.add('visible');
+            } else {
+                scrollButton.classList.remove('visible');
+            }
+        });
+        
+        // Обработчик клика для прокрутки наверх
+        scrollButton.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+    
+    // Проверяем наличие скрипта синтаксической подсветки
+    if (typeof loadSyntaxHighlighter === 'function') {
+        loadSyntaxHighlighter();
+    }
+});
+</script>
+
+<div class="scroll-to-top" id="scrollToTop">
+    <i class="fas fa-arrow-up"></i>
+</div>
+</body>
+</html> 

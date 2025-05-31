@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<script src="/js/mobile-redirect.js"></script>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ReFind</title>
+<meta name="description" content="Сервис для поиска информации из базы данных утечек"/>
+<meta name="theme-color" content="#121212"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="format-detection" content="telephone=no"/>
+<meta name="robots" content="index, follow"/>
+
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta name="referrer" content="no-referrer">
+
+<script type="text/javascript">
+(function(){
+    if (typeof window.__cfRLUnblockHandlers === 'undefined') {
+        window.__cfRLUnblockHandlers = true;
+    }
+    
+    window.addEventListener('error', function(e) {
+        if (e && e.target && (e.target.src || e.target.href)) {
+            var blockedResources = [
+                'favicon.ico', 'api.js', 'gtm.js', 'fbevents.js',
+                'analytics', 'track', 'pixel', 'collect'
+            ];
+            var resource = e.target.src || e.target.href;
+            for (var i = 0; i < blockedResources.length; i++) {
+                if (resource.indexOf(blockedResources[i]) !== -1) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        }
+    }, true);
+    
+    if (navigator.doNotTrack !== '1' && window.location.protocol === 'https:') {
+        var d = document.createElement('link');
+        d.rel = 'dns-prefetch';
+        d.href = '//cloudflare-dns.com';
+        document.head.appendChild(d);
+    }
+})();
+</script>
+
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "xxxx-xxxx-xxxx"}'></script>
+
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"></noscript>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<script defer="" src="/js/config.js"></script>
+<script defer="" src="/js/cloudshield.js"></script>
+<script defer="" src="/js/script.js"></script>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            background-color: #0A0A0A;
+            color: #FFF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+            text-rendering: optimizeSpeed;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background-color: rgba(12, 12, 12, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+        
+        .navbar.scrolled {
+            padding: 12px 24px;
+            background-color: rgba(10, 10, 10, 0.9);
+        }
+        
+        .ref {
+            width: auto;
+            height: 48px;
+            object-fit: contain;
+            max-width: 100%;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .navbar.scrolled .ref {
+            height: 40px;
+        }
+        
+        .desktop-menu {
+            display: flex;
+            gap: 16px;
+            margin-left: auto;
+        }
+        
+        .nav-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #121212;
+            color: #FFF;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.3px;
+        }
+        
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .nav-button.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .menu-data {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            height: 100vh;
+            background-color: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 999;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 80px;
+            transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .menu-data.active {
+            right: 0;
+            display: flex;
+        }
+        
+        .menu-data a {
+            display: block;
+            margin: 15px 25px;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-data a:hover, .menu-data a:active {
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        #Menu-bar {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        #Menu-bar:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .hero-section {
+            flex: 1;
+            background: #0A0A0A;
+            display: flex;
+            flex-direction: column;
+            padding-top: 80px;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+        
+        .hero-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            max-width: 850px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .main-title {
+            font-size: 5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #FFFFFF;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            background: linear-gradient(120deg, #fff, rgba(255,255,255,0.7), #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 6s linear infinite;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            backface-visibility: hidden;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+            100% { background-position: 0% center; }
+        }
+        
+        .main-subtitle {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 3.5rem;
+            max-width: 650px;
+            line-height: 1.5;
+            letter-spacing: 0.2px;
+        }
+        
+        .telegram-info-block {
+            max-width: 650px;
+            margin: 0 auto 2rem auto;
+            padding: 1.8rem;
+            background-color: rgba(25, 25, 25, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            animation-fill-mode: both;
+            animation-delay: 0.2s;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .telegram-info-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .telegram-icon-container {
+            width: 52px;
+            height: 52px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 18px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .telegram-icon-container i {
+            font-size: 1.8rem;
+            color: #e0e0e0;
+        }
+        
+        .telegram-contact-box {
+            background-color: rgba(15, 15, 15, 0.7);
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .telegram-contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .telegram-contact-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .telegram-contact-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #2A2A2A;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .telegram-contact-icon i {
+            font-size: 0.9rem;
+            color: #DDD;
+        }
+        
+        .telegram-contact-label {
+            color: #999;
+            font-size: 0.8rem;
+            margin-bottom: 2px;
+        }
+        
+        .telegram-contact-value a {
+            color: #FFF;
+            text-decoration: none;
+            font-size: 1.05rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+        
+        .telegram-contact-value a:after {
+            display: none;
+        }
+        
+        .telegram-banner {
+            display: none; /* Скрываем баннер снизу */
+        }
+        
+        @media (max-width: 768px) {
+            .desktop-menu {
+                display: none;
+            }
+            
+            #Menu-bar {
+                display: block;
+                cursor: pointer;
+                z-index: 1001;
+                font-size: 1.5rem;
+                padding: 10px;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.05);
+                transition: all 0.3s ease;
+            }
+            
+            #Menu-bar:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+            
+            .menu-data {
+                display: none;
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                height: 100vh;
+                background-color: rgba(10, 10, 10, 0.98);
+                flex-direction: column;
+                justify-content: flex-start;
+                padding-top: 80px;
+                transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                z-index: 999;
+                box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+            }
+            
+            .menu-data.active {
+                right: 0;
+                display: flex;
+            }
+            
+            .menu-data a {
+                display: block;
+                margin: 15px 25px;
+                font-size: 1.2rem;
+                text-align: center;
+                padding: 12px 15px;
+                border-radius: 8px;
+                background-color: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                transition: all 0.3s ease;
+                color: #fff;
+                text-decoration: none;
+            }
+            
+            .menu-data a:hover, .menu-data a:active {
+                background-color: rgba(255, 255, 255, 0.08);
+                transform: translateY(-2px);
+            }
+            
+            #close {
+                display: block;
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 10px;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.05);
+                transition: all 0.3s ease;
+            }
+            
+            #close:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                transform: rotate(90deg);
+            }
+            
+            .main-title {
+                font-size: 3.5rem;
+            }
+            
+            .main-subtitle {
+                font-size: 1.2rem;
+                margin-bottom: 2.5rem;
+            }
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+        }
+
+        .action-button i {
+            font-size: 1.1rem;
+        }
+
+        .action-button.primary {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #0A0A0A;
+            border: 2px solid transparent;
+        }
+
+        .action-button.primary:hover {
+            background-color: #fff;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.25);
+        }
+
+        .action-button.secondary {
+            background-color: rgba(30, 30, 30, 0.7);
+            color: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .action-button.secondary:hover {
+            background-color: rgba(40, 40, 40, 0.8);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .action-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="navbar" id="navbar">
+            <div class="refind">
+<a href="/index.html">
+<img alt="ReFind Logo" class="ref" loading="lazy" src="/assets/img/wpeA3eVCpHOxX3g6xC.png"/>
+</a>
+</div>
+<div class="desktop-menu">
+<a href="/index.html" class="nav-button active">Главная</a>
+<a href="/news.html" class="nav-button">Новости</a>
+<a href="/api.html" class="nav-button">API</a>
+<a href="/search.html" class="nav-button">Поиск</a>
+</div>
+<div id="Menu-bar">
+<i class="fas fa-bars size-icon"></i>
+</div>
+</div>
+<div class="menu-data">
+<a href="/index.html">Главная</a>
+<a href="/news.html">Новости</a>
+<a href="/api.html">API</a>
+<a href="/search.html">Поиск</a>
+</div>
+
+<div class="hero-section">
+<div class="hero-content">
+<h1 class="main-title">ReFind</h1>
+<p class="main-subtitle">Сервис для пробива.</p>
+
+<div class="action-buttons">
+    <a href="/search.html" class="action-button primary">
+        <i class="fas fa-search"></i> Начать поиск
+    </a>
+    <a href="/databases.html" class="action-button secondary">
+        <i class="fas fa-database"></i> Базы данных
+    </a>
+    <a href="/donate.html" class="action-button secondary">
+        <i class="fas fa-donate"></i> Поддержать
+    </a>
+</div>
+
+<div class="telegram-info-block">
+    <div class="telegram-header"></div>
+    
+    <div style="display: flex; align-items: center; margin-bottom: 16px;">
+        <div class="telegram-icon-container">
+            <i class="fab fa-telegram"></i>
+        </div>
+        <div>
+            <h3 style="margin: 0; font-size: 1.3rem; font-weight: 600; letter-spacing: -0.01em; color: #FFFFFF;">Полный доступ в Telegram</h3>
+            <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #999;">Для получения полных результатов поиска</p>
+        </div>
+    </div>
+    
+    <div class="telegram-contact-box">
+        <div class="telegram-contact-item">
+            <div class="telegram-contact-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div>
+                <div class="telegram-contact-label">Бот</div>
+                <div class="telegram-contact-value"><a href="https://t.me/ReFindOsintBot" target="_blank">@ReFindOsintBot</a></div>
+            </div>
+        </div>
+        
+        <div class="telegram-contact-item">
+            <div class="telegram-contact-icon">
+                <i class="fas fa-bullhorn"></i>
+                </div>
+            <div>
+                <div class="telegram-contact-label">Канал</div>
+                <div class="telegram-contact-value"><a href="https://t.me/python_enter" target="_blank">@python_enter</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+
+<script>
+    window.addEventListener('scroll', function() {
+        const navbar = document.getElementById('navbar');
+        if (window.scrollY > 10) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        function throttle(func, limit) {
+            let lastCall = 0;
+            return function() {
+                const now = Date.now();
+                if (now - lastCall >= limit) {
+                    lastCall = now;
+                    func.apply(this, arguments);
+                }
+            };
+        }
+
+        const menuBar = document.getElementById('Menu-bar');
+        const menuData = document.querySelector('.menu-data');
+        
+        if (menuBar) {
+            menuBar.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                menuData.classList.toggle('active');
+                menuBar.classList.toggle('active');
+                
+                if (menuData.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                    
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(50);
+                    }
+                } else {
+                    document.body.style.overflow = '';
+                    
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(30);
+                    }
+                }
+            });
+        }
+        
+        const menuLinks = document.querySelectorAll('.menu-data a');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                this.classList.add('pressed');
+                
+                setTimeout(() => {
+                    menuData.classList.remove('active');
+                    menuBar.classList.remove('active');
+                    document.body.style.overflow = '';
+                    this.classList.remove('pressed');
+                }, 150);
+                
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([15, 10, 15]);
+                }
+            });
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (menuData && menuData.classList.contains('active') && 
+                !menuData.contains(e.target) && 
+                e.target !== menuBar && 
+                !menuBar.contains(e.target)) {
+                menuData.classList.remove('active');
+                menuBar.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        const currentPage = window.location.pathname;
+        menuLinks.forEach(link => {
+            const linkPath = link.getAttribute('href');
+            if (linkPath && currentPage.includes(linkPath) && linkPath !== '/') {
+                link.classList.add('active');
+            } else if ((currentPage === '/' || currentPage === '/index.html') && linkPath === '/index.html') {
+                link.classList.add('active');
+            }
+        });
+        
+        const telegramBanner = document.getElementById('telegramBanner');
+        const closeBannerBtn = document.getElementById('closeBanner');
+        
+        if (closeBannerBtn) {
+            closeBannerBtn.addEventListener('click', function() {
+                telegramBanner.style.display = 'none';
+                setCookie('banner_closed', 'true', 1);
+            });
+        }
+        
+        if (!getCookie('banner_closed')) {
+            telegramBanner.style.display = 'flex';
+        }
+        
+        function setCookie(name, value, hours) {
+            const date = new Date();
+            date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+        
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+        
+        function loadDatabasesCount() {
+            const dbCountBadge = document.getElementById('db-count-badge');
+            
+            let apiUrl = '';
+            if (window.ReFind && window.ReFind.config) {
+                apiUrl = window.ReFind.config.api_url + '/databases';
+            } 
+            
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Не удалось загрузить данные');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.databases && Array.isArray(data.databases)) {
+                        dbCountBadge.innerHTML = `<i class="fas fa-database" style="margin-right: 6px;"></i> ${data.databases.length} баз данных`;
+                    } else {
+                        throw new Error('Некорректный формат данных');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке количества баз данных:', error);
+                    dbCountBadge.innerHTML = `<i class="fas fa-exclamation-circle" style="margin-right: 6px;"></i> Ошибка загрузки`;
+                    dbCountBadge.style.backgroundColor = 'rgba(229, 62, 62, 0.2)';
+                    dbCountBadge.style.color = '#fc8181';
+                });
+        }
+        
+        loadDatabasesCount();
+        
+        document.getElementById('downloadJson').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '/databases.html?download=json';
+        });
+        
+        document.getElementById('downloadHtml').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '/databases.html?download=html';
+        });
+    });
+</script>
+</body>
+</html>
